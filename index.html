@@ -228,6 +228,51 @@
     .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid rgba(0,212,190,.3);border-radius:50px;padding:11px 22px;font-weight:700;font-size:.85rem;z-index:500;white-space:nowrap;animation:toastIn .3s ease;}
     @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
 
+    /* FILL-IN-BLANK input */
+    .fb-input-wrap{display:flex;gap:8px;align-items:stretch;margin-bottom:4px;}
+    .fb-inp{
+      flex:1;background:var(--bg);border:2px solid rgba(255,214,10,.35);border-radius:10px;
+      color:var(--text);font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:600;
+      padding:11px 14px;transition:border-color .2s;
+    }
+    .fb-inp:focus{outline:none;border-color:var(--yellow);}
+    .fb-inp.correct{border-color:var(--teal)!important;background:rgba(0,212,190,.08);}
+    .fb-inp.wrong{border-color:var(--accent)!important;background:rgba(255,77,109,.08);}
+    .fb-inp:disabled{opacity:.8;cursor:not-allowed;}
+    .fb-submit{
+      font-family:'Nunito',sans-serif;font-weight:800;font-size:.88rem;
+      padding:11px 20px;border:none;border-radius:10px;cursor:pointer;
+      background:linear-gradient(135deg,var(--yellow),#e6a800);color:#060d1a;
+      transition:all .2s;white-space:nowrap;
+    }
+    .fb-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,214,10,.3);}
+    .fb-submit:disabled{opacity:.4;cursor:not-allowed;}
+    .fb-hint{font-size:.75rem;color:var(--muted);margin-top:4px;font-style:italic;}
+
+    /* REVIEW PANEL */
+    .review-wrap{margin-top:28px;}
+    .review-title{font-family:'Fredoka One',cursive;font-size:1.4rem;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .review-item{
+      background:var(--surface);border-radius:12px;padding:16px 18px;margin-bottom:10px;
+      border-left:4px solid rgba(255,255,255,.1);animation:cardIn .2s ease;
+    }
+    .review-item.r-correct{border-left-color:var(--teal);}
+    .review-item.r-wrong{border-left-color:var(--accent);}
+    .review-item.r-skip{border-left-color:var(--muted);}
+    .ri-top{display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
+    .ri-qnum{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--muted);}
+    .ri-badge{font-size:.68rem;font-weight:800;padding:3px 9px;border-radius:50px;}
+    .ri-badge.r-correct{background:rgba(0,212,190,.15);color:var(--teal);}
+    .ri-badge.r-wrong{background:rgba(255,77,109,.15);color:#ff8a9a;}
+    .ri-badge.r-skip{background:rgba(107,140,173,.15);color:var(--muted);}
+    .ri-q{font-weight:700;font-size:.88rem;line-height:1.5;margin-bottom:8px;word-break:break-word;}
+    .ri-answers{display:flex;flex-direction:column;gap:5px;font-size:.82rem;}
+    .ri-your{color:var(--muted);}
+    .ri-your span{color:var(--text);font-weight:700;}
+    .ri-your span.was-wrong{color:#ff8a9a;}
+    .ri-correct-ans{color:var(--teal);font-weight:700;}
+    .ri-explain{font-size:.78rem;color:var(--muted);margin-top:6px;border-top:1px solid rgba(255,255,255,.05);padding-top:6px;line-height:1.5;}
+
     /* AI MODE TOGGLE */
     .ai-toggle-row{
       display:flex;align-items:center;justify-content:space-between;
@@ -656,6 +701,7 @@
           <div class="tr-big">⭐ <span id="trFPts">0</span> / 50</div>
           <div class="tr-msg" id="trMsg"></div>
           <button class="btn-s" onclick="triviaStart()">▶ Play Again</button>
+          <div id="tr-review" style="margin-top:14px"></div>
         </div>
       </div>
 
@@ -932,7 +978,7 @@ async function extractText(f){
 // ─────────────────────────────────────────────
 //  QUIZ ENGINE — PURE CLIENT-SIDE
 // ─────────────────────────────────────────────
-let activeQuiz=[], quizAnswered=[], quizScore=0;
+let activeQuiz=[], quizAnswered=[], quizScore=0, quizUserAnswers=[];
 
 function setProgress(pct,label){
   document.getElementById('genProg').className='gen-prog on';
@@ -979,6 +1025,7 @@ async function buildQuiz(){
     document.getElementById('genProg').className='gen-prog';
     activeQuiz=questions.slice(0,numQ);
     quizAnswered=new Array(activeQuiz.length).fill(false);
+    quizUserAnswers=new Array(activeQuiz.length).fill(null);
     quizScore=0;
     renderQuiz();
     document.getElementById('quizArea').scrollIntoView({behavior:'smooth',block:'start'});
@@ -1129,14 +1176,30 @@ function renderQuiz(){
     const tc={mc:'type-mc',tf:'type-tf',fb:'type-fb'}[q.type];
     const card=document.createElement('div');
     card.className='q-card';card.id='qc-'+qi;
-    card.innerHTML=`
-      <div class="q-num-label"><span>Q${qi+1}</span><span class="q-type-badge ${tc}">${tl}</span></div>
-      <div class="q-text">${esc(q.question)}</div>
-      <div class="q-opts" id="qo-${qi}">${q.options.map((o,oi)=>`
+
+    let optsHtml='';
+    if(q.type==='fb'){
+      optsHtml=`
+        <div class="q-opts" id="qo-${qi}">
+          <div class="fb-input-wrap">
+            <input class="fb-inp" id="fbi-${qi}" type="text" placeholder="Type your answer here…" autocomplete="off"
+              onkeydown="if(event.key==='Enter')submitFB(${qi})"/>
+            <button class="fb-submit" id="fbs-${qi}" onclick="submitFB(${qi})">Submit ✓</button>
+          </div>
+          <div class="fb-hint">💡 Tip: type the word or phrase that fills the blank, then press Enter or Submit</div>
+        </div>`;
+    } else {
+      optsHtml=`<div class="q-opts" id="qo-${qi}">${q.options.map((o,oi)=>`
         <button class="q-opt" onclick="answerQ(${qi},${oi})">
           <span class="opt-lbl">${['A','B','C','D'][oi]||'?'}</span>${esc(o)}
         </button>`).join('')}
-      </div>
+      </div>`;
+    }
+
+    card.innerHTML=`
+      <div class="q-num-label"><span>Q${qi+1}</span><span class="q-type-badge ${tc}">${tl}</span></div>
+      <div class="q-text">${esc(q.question)}</div>
+      ${optsHtml}
       <div class="q-explain" id="qe-${qi}">${esc(q.explain||'')}</div>
     `;
     area.appendChild(card);
@@ -1150,6 +1213,7 @@ function renderQuiz(){
 function answerQ(qi,oi){
   if(quizAnswered[qi])return;
   quizAnswered[qi]=true;
+  quizUserAnswers[qi]={type:'choice',chosen:oi};
   const q=activeQuiz[qi];
   document.querySelectorAll('#qo-'+qi+' .q-opt').forEach((b,i)=>{
     b.disabled=true;
@@ -1164,6 +1228,40 @@ function answerQ(qi,oi){
   if(ans===activeQuiz.length)showResults();
 }
 
+function submitFB(qi){
+  if(quizAnswered[qi])return;
+  const q=activeQuiz[qi];
+  const inp=document.getElementById('fbi-'+qi);
+  const btn=document.getElementById('fbs-'+qi);
+  const userVal=(inp.value||'').trim();
+  if(!userVal){inp.focus();toast('✏️ Type your answer first!');return;}
+
+  quizAnswered[qi]=true;
+  inp.disabled=true;btn.disabled=true;
+  quizUserAnswers[qi]={type:'text',value:userVal};
+
+  const correct=q.options[q.correct];
+  // fuzzy match: lowercase, strip punctuation, allow partial
+  const norm=s=>s.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim();
+  const isCorrect=norm(userVal)===norm(correct)||norm(correct).includes(norm(userVal))||norm(userVal).includes(norm(correct));
+
+  if(isCorrect){
+    quizScore++;
+    inp.classList.add('correct');
+    document.getElementById('qe-'+qi).className='q-explain on';
+    document.getElementById('qe-'+qi).innerHTML='✅ Correct! ' + esc(q.explain||'');
+  } else {
+    inp.classList.add('wrong');
+    document.getElementById('qe-'+qi).className='q-explain on';
+    document.getElementById('qe-'+qi).innerHTML=`❌ The answer was: <strong style="color:var(--teal)">${esc(correct)}</strong><br/>${esc(q.explain||'')}`;
+  }
+
+  const ans=quizAnswered.filter(Boolean).length;
+  document.getElementById('qCounter').textContent=`${ans} of ${activeQuiz.length} answered`;
+  document.getElementById('qScore').textContent=`⭐ ${quizScore} / ${activeQuiz.length}`;
+  if(ans===activeQuiz.length)showResults();
+}
+
 function showResults(){
   const pct=Math.round(quizScore/activeQuiz.length*100);
   let emoji='😅',msg='Keep going — every quiz makes you sharper!';
@@ -1171,10 +1269,56 @@ function showResults(){
   else if(pct>=75){emoji='🎉';msg='Great work, future OD! You\'ve got this!';}
   else if(pct>=60){emoji='👍';msg='Solid! Review the missed ones and try again.';}
   else if(pct>=40){emoji='📖';msg='Keep studying — every session builds those neural pathways!';}
+
+  // Build review HTML
+  let reviewHtml='<div class="review-wrap"><div class="review-title">📋 Full Review</div>';
+  activeQuiz.forEach((q,qi)=>{
+    const ua=quizUserAnswers[qi];
+    const correctAns=q.options[q.correct];
+    let isCorrect=false, userDisplay='—';
+
+    if(ua){
+      if(ua.type==='choice'){
+        isCorrect=(ua.chosen===q.correct);
+        userDisplay=q.options[ua.chosen]||'—';
+      } else {
+        const norm=s=>s.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim();
+        isCorrect=norm(ua.value)===norm(correctAns)||norm(correctAns).includes(norm(ua.value))||norm(ua.value).includes(norm(correctAns));
+        userDisplay=ua.value;
+      }
+    }
+
+    const statusClass=!ua?'r-skip':isCorrect?'r-correct':'r-wrong';
+    const statusLabel=!ua?'Skipped':isCorrect?'✅ Correct':'❌ Incorrect';
+    const tl={mc:'MC',tf:'T/F',fb:'Fill Blank'}[q.type];
+
+    reviewHtml+=`<div class="review-item ${statusClass}">
+      <div class="ri-top">
+        <span class="ri-qnum">Q${qi+1} · ${tl}</span>
+        <span class="ri-badge ${statusClass}">${statusLabel}</span>
+      </div>
+      <div class="ri-q">${esc(q.question)}</div>
+      <div class="ri-answers">
+        <div class="ri-your">Your answer: <span class="${isCorrect?'':'was-wrong'}">${esc(userDisplay)}</span></div>
+        ${!isCorrect?`<div class="ri-correct-ans">✓ Correct answer: ${esc(correctAns)}</div>`:''}
+      </div>
+      ${q.explain?`<div class="ri-explain">${esc(q.explain)}</div>`:''}
+    </div>`;
+  });
+  reviewHtml+='</div>';
+
   const res=document.getElementById('qResults');
   res.style.display='';
-  res.innerHTML=`<div class="results-wrap"><div class="res-emoji">${emoji}</div><div class="res-score">${quizScore} / ${activeQuiz.length}</div><div class="res-pct">${pct}% correct</div><div class="res-msg">${msg}</div><button class="btn-p" onclick="buildQuiz()">🔄 New Quiz — Same Notes</button> <button class="btn-s" style="margin-top:10px" onclick="clearFile()">📁 Upload Different Notes</button></div>`;
-  res.scrollIntoView({behavior:'smooth',block:'center'});
+  res.innerHTML=`<div class="results-wrap">
+    <div class="res-emoji">${emoji}</div>
+    <div class="res-score">${quizScore} / ${activeQuiz.length}</div>
+    <div class="res-pct">${pct}% correct</div>
+    <div class="res-msg">${msg}</div>
+    <button class="btn-p" onclick="buildQuiz()">🔄 New Quiz — Same Notes</button>
+    <button class="btn-s" style="margin-top:10px" onclick="clearFile()">📁 Upload Different Notes</button>
+  </div>
+  ${reviewHtml}`;
+  res.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 // ─────────────────────────────────────────────
@@ -1322,9 +1466,9 @@ const TRIVIA=[
   {q:"Which of the following is NOT part of the uveal tract?",opts:["Iris","Ciliary body","Choroid","Sclera"],c:3,fact:"The uveal tract = iris + ciliary body + choroid. The sclera is the fibrous outer coat, not part of the uvea."},
   {q:"Photopsia (seeing flashes of light) is most associated with:",opts:["Corneal abrasion","Posterior vitreous detachment or retinal tear","Glaucoma","Dry eye"],c:1,fact:"Photopsia occurs when the vitreous tugs on or tears the retina, stimulating photoreceptors mechanically — a warning sign of retinal detachment."}
 ];
-let trIdx=0,trScore=0,trOrder=[];
+let trIdx=0,trScore=0,trOrder=[],trUserAnswers=[];
 function triviaStart(){
-  trIdx=0;trScore=0;trOrder=shuffle([...Array(TRIVIA.length).keys()]);
+  trIdx=0;trScore=0;trOrder=shuffle([...Array(TRIVIA.length).keys()]);trUserAnswers=[];
   document.getElementById('tr-start').style.display='none';
   document.getElementById('tr-result').style.display='none';
   document.getElementById('tr-play').style.display='block';
@@ -1343,6 +1487,7 @@ function trRender(){
 }
 function trAnswer(chosen){
   const q=TRIVIA[trOrder[trIdx]];
+  trUserAnswers.push({q:q.q,opts:q.opts,correct:q.c,chosen,fact:q.fact});
   document.querySelectorAll('.tr-opt').forEach((b,i)=>{b.disabled=true;if(i===q.c)b.classList.add('correct');else if(i===chosen&&chosen!==q.c)b.classList.add('wrong');});
   if(chosen===q.c)trScore++;
   document.getElementById('trPts').textContent=trScore;
@@ -1361,6 +1506,24 @@ function trEnd(){
   else if(pct>=55)msg='👍 Good effort! A bit more revision and you\'ll ace it.';
   document.getElementById('trMsg').textContent=msg;
   document.querySelector('#tr-result .tr-big').innerHTML=`⭐ <span id="trFPts">${trScore}</span> / ${TRIVIA.length}`;
+
+  // Build review
+  const missed=trUserAnswers.filter(a=>a.chosen!==a.correct);
+  const revEl=document.getElementById('tr-review');
+  if(missed.length===0){revEl.innerHTML='<div style="color:var(--teal);font-weight:800;text-align:center;padding:10px 0">🎯 Perfect — you got them all right!</div>';return;}
+  let html=`<details style="margin-top:4px"><summary style="cursor:pointer;font-weight:800;font-size:.85rem;color:var(--yellow);padding:8px 0">📋 Review ${missed.length} missed question${missed.length>1?'s':''}</summary><div style="margin-top:10px">`;
+  missed.forEach(a=>{
+    html+=`<div class="review-item r-wrong" style="margin-bottom:8px">
+      <div class="ri-q">${esc(a.q)}</div>
+      <div class="ri-answers">
+        <div class="ri-your">Your answer: <span class="was-wrong">${esc(a.opts[a.chosen])}</span></div>
+        <div class="ri-correct-ans">✓ Correct: ${esc(a.opts[a.correct])}</div>
+      </div>
+      <div class="ri-explain">💡 ${esc(a.fact)}</div>
+    </div>`;
+  });
+  html+='</div></details>';
+  revEl.innerHTML=html;
 }
 
 // ─────────────────────────────────────────────
@@ -1486,9 +1649,9 @@ const RX_QS = [
   {rx:"BVD: 12 mm",q:"BVD (Back Vertex Distance) is important for prescriptions stronger than:",opts:["±1.00 D","±4.00 D","±0.25 D","±10.00 D"],c:1,fact:"BVD matters for powers ≥±4.00 D — the distance from the lens back surface to the cornea affects the effective power delivered to the eye."},
 ];
 
-let rxIdx=0, rxScore=0, rxOrder=[];
+let rxIdx=0, rxScore=0, rxOrder=[], rxUserAnswers=[];
 function rxStart(){
-  rxIdx=0;rxScore=0;rxOrder=shuffle([...Array(RX_QS.length).keys()]);
+  rxIdx=0;rxScore=0;rxOrder=shuffle([...Array(RX_QS.length).keys()]);rxUserAnswers=[];
   document.getElementById('rx-start').style.display='none';
   document.getElementById('rx-result').style.display='none';
   document.getElementById('rx-play').style.display='block';
@@ -1512,6 +1675,7 @@ function rxRender(){
 }
 function rxAnswer(chosen){
   const q=RX_QS[rxOrder[rxIdx]];
+  rxUserAnswers.push({rx:q.rx,question:q.q,opts:q.opts,correct:q.c,chosen,fact:q.fact});
   document.querySelectorAll('#rxOpts .tr-opt').forEach((b,i)=>{
     b.disabled=true;
     if(i===q.c)b.classList.add('correct');
@@ -1534,6 +1698,27 @@ function rxNext(){
     else if(pct>=70)msg='🎉 Great decoding skills! Phil is impressed.';
     else if(pct>=50)msg='👍 Getting there — review the Rx notation rules!';
     document.getElementById('rxMsg').textContent=msg;
+    // Review missed
+    const missed=rxUserAnswers.filter(a=>a.chosen!==a.correct);
+    const revBox=document.getElementById('rx-result');
+    const old=revBox.querySelector('.rx-review');if(old)old.remove();
+    if(missed.length>0){
+      const div=document.createElement('div');div.className='rx-review';
+      let html=`<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:800;font-size:.82rem;color:var(--yellow);padding:6px 0">📋 Review ${missed.length} missed</summary><div style="margin-top:8px">`;
+      missed.forEach(a=>{
+        html+=`<div class="review-item r-wrong" style="margin-bottom:8px">
+          <div style="font-family:'Space Mono',monospace;font-size:.7rem;color:var(--yellow);margin-bottom:4px;white-space:pre-line">${esc(a.rx)}</div>
+          <div class="ri-q">${esc(a.question)}</div>
+          <div class="ri-answers">
+            <div class="ri-your">Your answer: <span class="was-wrong">${esc(a.opts[a.chosen])}</span></div>
+            <div class="ri-correct-ans">✓ Correct: ${esc(a.opts[a.correct])}</div>
+          </div>
+          <div class="ri-explain">💡 ${esc(a.fact)}</div>
+        </div>`;
+      });
+      html+='</div></details>';
+      div.innerHTML=html;revBox.appendChild(div);
+    }
   } else rxRender();
 }
 
