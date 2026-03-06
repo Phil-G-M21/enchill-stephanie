@@ -25,7 +25,7 @@
       background-size:44px 44px;
       mask-image:radial-gradient(ellipse at center,black 20%,transparent 80%);
     }
-    .bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
     .orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orbFloat ease-in-out infinite alternate;}
     @keyframes orbFloat{from{transform:translateY(0) scale(1);}to{transform:translateY(-40px) scale(1.08);}}
 
@@ -157,7 +157,7 @@
     .q-card{background:var(--surface);border:1px solid rgba(255,255,255,.05);border-radius:var(--rad);padding:26px;margin-bottom:12px;animation:cardIn .25s ease;}
     @keyframes cardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
     .q-num-label{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
-    .q-text{font-size:1.05rem;font-weight:700;line-height:1.55;margin-bottom:18px;}
+    .q-text{font-size:1.05rem;font-weight:700;line-height:1.55;margin-bottom:18px;word-break:break-word;}
     .q-opts{display:flex;flex-direction:column;gap:8px;}
     .q-opt{
       background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.07);
@@ -169,7 +169,7 @@
     .q-opt.correct{background:rgba(0,212,190,.18)!important;border-color:var(--teal)!important;color:var(--teal);}
     .q-opt.wrong{background:rgba(255,77,109,.18)!important;border-color:var(--accent)!important;color:#ff8a9a;}
     .opt-lbl{background:rgba(255,255,255,.08);border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:.68rem;flex-shrink:0;}
-    .q-explain{margin-top:12px;padding:10px 14px;font-size:.83rem;color:var(--muted);background:rgba(0,212,190,.06);border-left:3px solid var(--teal);border-radius:5px;display:none;line-height:1.6;}
+    .q-explain{margin-top:12px;padding:10px 14px;font-size:.83rem;color:var(--muted);background:rgba(0,212,190,.06);border-left:3px solid var(--teal);border-radius:5px;display:none;line-height:1.6;word-break:break-word;}
     .q-explain.on{display:block;}
 
     .results-wrap{background:var(--surface);border:1px solid rgba(255,214,10,.18);border-radius:var(--rad);padding:44px;text-align:center;animation:cardIn .3s ease;margin-top:16px;}
@@ -219,7 +219,7 @@
     .tr-big{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--yellow);}
     .tr-msg{color:var(--muted);font-size:.88rem;margin:6px 0 14px;}
 
-    footer{position:relative;z-index:1;background:var(--surface);text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.04);}
+    footer{position:relative;z-index:1;background:var(--surface);text-align:center;padding:26px 16px;border-top:1px solid rgba(255,255,255,.04);}
     footer p{color:var(--muted);font-size:.84rem;line-height:1.7;}
     footer .fh{color:var(--accent);}
     footer .fp{color:var(--teal);font-weight:800;}
@@ -277,12 +277,154 @@
     .steps strong{color:var(--text);}
     .model-note{font-size:.75rem;color:var(--muted);margin-top:8px;opacity:.7;}
 
-    @media(max-width:640px){
-      nav{padding:12px 16px;}
-      .page{padding:84px 16px 50px;}
-      .opts-row{grid-template-columns:1fr 1fr;}
-      .games-grid{grid-template-columns:1fr;}
-      .how-pills{flex-direction:column;}
+    /* NOTIFY PAGE */
+    .notify-hero{text-align:center;padding:20px 0 32px;}
+    .notify-hero .n-icon{font-size:4rem;margin-bottom:12px;display:inline-block;animation:bellRing 3s ease-in-out infinite;}
+    @keyframes bellRing{0%,80%,100%{transform:rotate(0);}85%{transform:rotate(15deg);}90%{transform:rotate(-15deg);}95%{transform:rotate(10deg);}97%{transform:rotate(-5deg);}}
+    .notify-hero h2{font-family:'Fredoka One',cursive;font-size:2rem;margin-bottom:6px;}
+    .notify-hero p{color:var(--muted);font-size:.95rem;line-height:1.65;}
+    .notify-card{background:var(--surface);border:1px solid rgba(255,214,10,.18);border-radius:var(--rad);padding:28px;margin-bottom:18px;}
+    .notify-card h3{font-family:'Fredoka One',cursive;font-size:1.2rem;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .time-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+    .time-row label{font-weight:800;font-size:.82rem;color:var(--teal);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+    .time-inp{background:var(--bg);border:1.5px solid rgba(0,212,190,.25);border-radius:10px;color:var(--text);font-family:'Space Mono',monospace;font-size:1.1rem;padding:10px 16px;width:140px;}
+    .time-inp:focus{outline:none;border-color:var(--teal);}
+    .notify-status{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:.88rem;font-weight:700;}
+    .notify-status.off{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);color:#ff8a9a;}
+    .notify-status.on{background:rgba(0,212,190,.08);border:1px solid rgba(0,212,190,.2);color:var(--teal);}
+    .notify-status.pending{background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.2);color:var(--yellow);}
+    .ns-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+    .ns-dot.off{background:var(--accent);}
+    .ns-dot.on{background:var(--teal);box-shadow:0 0 8px rgba(0,212,190,.6);}
+    .ns-dot.pending{background:var(--yellow);}
+    .preview-q{background:var(--bg);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,.06);margin-bottom:16px;}
+    .pq-label{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--yellow);margin-bottom:8px;}
+    .pq-text{font-weight:700;font-size:.95rem;line-height:1.5;margin-bottom:12px;}
+    .pq-opts{display:flex;flex-direction:column;gap:6px;}
+    .pq-opt{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:9px 13px;font-size:.84rem;color:var(--muted);}
+    .pq-opt.ans{border-color:var(--teal);color:var(--teal);background:rgba(0,212,190,.08);}
+    .sw-note{background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.2);border-radius:10px;padding:12px 16px;font-size:.82rem;color:var(--muted);line-height:1.6;}
+    .sw-note strong{color:var(--purple);}
+    .big-enable-btn{
+      width:100%;font-family:'Nunito',sans-serif;font-weight:800;font-size:1.05rem;
+      padding:15px;border:none;border-radius:12px;cursor:pointer;
+      background:linear-gradient(135deg,var(--yellow),#e6a800);color:#060d1a;
+      transition:all .2s;box-shadow:0 4px 20px rgba(255,214,10,.2);margin-bottom:10px;
+    }
+    .big-enable-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,214,10,.35);}
+    .big-enable-btn:disabled{opacity:.45;cursor:not-allowed;}
+    .disable-btn{
+      width:100%;font-family:'Nunito',sans-serif;font-weight:700;font-size:.88rem;
+      padding:11px;border:1.5px solid rgba(255,77,109,.3);border-radius:10px;cursor:pointer;
+      background:transparent;color:#ff8a9a;transition:all .2s;
+    }
+    .disable-btn:hover{background:rgba(255,77,109,.1);}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px){
+      /* Nav — hamburger-style scrollable row */
+      nav{padding:10px 14px;flex-wrap:nowrap;gap:6px;}
+      .nav-logo{font-size:1rem;gap:5px;}
+      .nav-links{
+        gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+        scrollbar-width:none;padding-bottom:2px;flex-shrink:0;
+      }
+      .nav-links::-webkit-scrollbar{display:none;}
+      .nbtn{padding:6px 11px;font-size:.75rem;white-space:nowrap;flex-shrink:0;}
+
+      /* Pages */
+      .page{padding:80px 14px 56px;}
+      .inner{max-width:100%;}
+
+      /* Hero */
+      .hero h1{font-size:clamp(1.8rem,7vw,2.6rem);}
+      .hero p{font-size:.92rem;}
+      .hero-btns{flex-direction:column;gap:10px;}
+      .hero-btns .btn-p,.hero-btns .btn-s{width:100%;text-align:center;}
+      .hero-eye{font-size:3.8rem;}
+
+      /* Section titles */
+      .sec-title{font-size:1.7rem;}
+
+      /* How pills */
+      .how-pills{flex-direction:column;gap:8px;}
+      .hw{padding:10px 14px;}
+
+      /* Upload zone */
+      .drop-zone{padding:28px 16px;}
+      .dz-icon{font-size:2rem;}
+
+      /* Options row */
+      .opts-row{grid-template-columns:1fr 1fr;gap:10px;}
+      .opt-g:last-child{grid-column:1/-1;}
+
+      /* AI toggle row */
+      .ai-toggle-row{flex-wrap:wrap;gap:10px;}
+      .ai-toggle-left{flex:1;min-width:0;}
+      .ai-label{font-size:.88rem;}
+      .ai-sub{font-size:.72rem;}
+
+      /* Quiz cards */
+      .q-card{padding:18px 14px;}
+      .q-text{font-size:.97rem;}
+      .q-opt{font-size:.84rem;padding:10px 12px;}
+      .quiz-bar{flex-wrap:wrap;gap:8px;}
+
+      /* Results */
+      .results-wrap{padding:28px 16px;}
+      .res-score{font-size:2.6rem;}
+
+      /* Games grid */
+      .games-grid{grid-template-columns:1fr;gap:16px;}
+      .g-card{padding:20px 16px;}
+
+      /* Snellen */
+      .sn-disp{height:110px;}
+      .sn-inp{font-size:1.2rem;padding:8px;}
+
+      /* Notify page */
+      .notify-card{padding:20px 14px;}
+      .notify-hero h2{font-size:1.6rem;}
+      .notify-hero p{font-size:.88rem;}
+      .time-row{flex-wrap:wrap;gap:8px;}
+      .time-inp{width:120px;font-size:1rem;}
+      .big-enable-btn{font-size:.95rem;padding:13px;}
+      .pq-opt{font-size:.8rem;padding:8px 10px;}
+
+      /* Modals */
+      .modal{padding:22px 18px;max-width:100%;margin:14px;}
+      .modal h2{font-size:1.3rem;}
+      .modal-btns{flex-direction:column-reverse;gap:8px;}
+      .modal-btns button{width:100%;}
+      .steps{font-size:.79rem;line-height:1.7;}
+
+      /* Trivia & Rx & AF in games */
+      .tr-q{font-size:.88rem;}
+      .tr-opt{font-size:.8rem;padding:8px 11px;}
+
+      /* Gen button */
+      .gen-btn{font-size:.98rem;padding:14px;}
+
+      /* File pill */
+      .fp-name{font-size:.85rem;}
+
+      /* Score badges */
+      .q-score-badge,.q-counter{font-size:.76rem;}
+    }
+
+    @media(max-width:400px){
+      .nav-logo-text{display:none;}
+      .hero h1{font-size:1.6rem;}
+      .opts-row{grid-template-columns:1fr;}
+      .opt-g:last-child{grid-column:auto;}
+      .hero-eye{font-size:3rem;}
+      .notify-hero .n-icon{font-size:3rem;}
+    }
+
+    /* Touch-friendly tap targets */
+    @media(hover:none){
+      .q-opt,.tr-opt,.btn-p,.btn-s,.nbtn,.gen-btn{min-height:44px;}
+      .q-opt:active{transform:scale(.98);}
     }
   </style>
 </head>
@@ -297,12 +439,13 @@
 
 <nav>
   <div class="nav-logo" onclick="showPage('home')">
-    <span class="eye-blink">👁️</span> Steph's Study Space
+    <span class="eye-blink">👁️</span> <span class="nav-logo-text">Steph's Study Space</span>
   </div>
   <div class="nav-links">
     <button class="nbtn on" id="nb-home" onclick="showPage('home')">Home</button>
     <button class="nbtn" id="nb-quiz" onclick="showPage('quiz')">📚 Quiz Me</button>
     <button class="nbtn" id="nb-games" onclick="showPage('games')">🎮 Games</button>
+    <button class="nbtn" id="nb-notify" onclick="showPage('notify')" style="border-color:rgba(255,214,10,.3);color:var(--yellow);">🔔 Daily Q</button>
     <button class="nbtn" id="nb-aikey" onclick="openKeyModal()" style="border-color:rgba(168,85,247,.3);color:var(--purple);">
       <span class="key-dot" id="navKeyDot"></span>Groq AI
     </button>
@@ -525,6 +668,57 @@
   </div>
 </div>
 
+<!-- NOTIFICATIONS PAGE -->
+<div class="page" id="pg-notify" style="display:none">
+  <div class="inner" style="max-width:580px">
+
+    <div class="notify-hero">
+      <div class="n-icon">🔔</div>
+      <h2>Daily Question Reminders</h2>
+      <p>Get a random optometry question delivered as a browser notification every day at your chosen time — even on your phone!</p>
+    </div>
+
+    <!-- Status -->
+    <div class="notify-card">
+      <h3>📡 Notification Status</h3>
+      <div class="notify-status off" id="notifyStatus">
+        <span class="ns-dot off" id="nsDot"></span>
+        <span id="nsText">Notifications not enabled yet</span>
+      </div>
+
+      <!-- Time picker -->
+      <div class="time-row">
+        <label>⏰ Daily time</label>
+        <input type="time" class="time-inp" id="notifyTime" value="09:00"/>
+        <span style="font-size:.82rem;color:var(--muted)">every day</span>
+      </div>
+
+      <button class="big-enable-btn" id="enableBtn" onclick="enableNotifications()">
+        🔔 Enable Daily Reminders
+      </button>
+      <button class="disable-btn" id="disableBtn" onclick="disableNotifications()" style="display:none">
+        Turn Off Reminders
+      </button>
+    </div>
+
+    <!-- Daily Q preview -->
+    <div class="notify-card">
+      <h3>👁️ Today's Question Preview</h3>
+      <div class="preview-q" id="previewQ"></div>
+      <button class="btn-ghost" style="width:100%;font-size:.85rem" onclick="refreshPreview()">🔄 Show different question</button>
+    </div>
+
+    <!-- How it works -->
+    <div class="sw-note">
+      <strong>How it works:</strong> This site registers a background service worker that schedules a notification at your chosen time. 
+      It works when your browser is open in the background — even if this tab isn't active.<br/><br/>
+      <strong>For it to work when the browser is fully closed</strong>, add the site to your home screen (on mobile: Share → Add to Home Screen) so it runs like an app. 📱<br/><br/>
+      <strong>⚠️ Requires GitHub Pages</strong> — notifications won't work when opening the file directly from your computer.
+    </div>
+
+  </div>
+</div>
+
 <!-- GROQ KEY MODAL -->
 <div class="modal-ov" id="keyModal">
   <div class="modal">
@@ -562,12 +756,13 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 //  NAV
 // ─────────────────────────────────────────────
 function showPage(id) {
-  ['home','quiz','games'].forEach(p => {
+  ['home','quiz','games','notify'].forEach(p => {
     document.getElementById('pg-'+p).style.display = p===id ? '' : 'none';
     const nb = document.getElementById('nb-'+p);
     if(nb) nb.className = 'nbtn'+(p===id?' on':'');
   });
   window.scrollTo(0,0);
+  if(id==='notify'){ renderPreview(); updateNotifyUI(); }
 }
 
 // ─────────────────────────────────────────────
@@ -1362,6 +1557,207 @@ function afAnswer(correct){
     },1200);
   }
 }
+
+// ─────────────────────────────────────────────
+//  NOTIFICATIONS SYSTEM
+// ─────────────────────────────────────────────
+
+// Inline service worker as a blob — works on GitHub Pages (https)
+const SW_CODE = `
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+
+// Listen for schedule messages
+self.addEventListener('message', e => {
+  if(e.data && e.data.type === 'SCHEDULE'){
+    const { time, question } = e.data;
+    scheduleNotification(time, question);
+  }
+});
+
+function scheduleNotification(timeStr, q){
+  const [h, m] = timeStr.split(':').map(Number);
+  const now = new Date();
+  const next = new Date();
+  next.setHours(h, m, 0, 0);
+  if(next <= now) next.setDate(next.getDate() + 1);
+  const delay = next - now;
+  setTimeout(() => {
+    self.registration.showNotification("👁️ Daily Optometry Q — Steph!", {
+      body: q.question + "\\n\\nA: " + q.options[q.correct],
+      icon: "https://cdn.jsdelivr.net/npm/twemoji@14/assets/72x72/1f441.png",
+      badge: "https://cdn.jsdelivr.net/npm/twemoji@14/assets/72x72/1f514.png",
+      tag: "daily-q",
+      requireInteraction: true,
+      actions: [{ action: "open", title: "Open Study Space" }]
+    });
+    // Schedule the next one in 24h
+    setTimeout(() => scheduleNotification(timeStr, nextQ()), 24 * 60 * 60 * 1000);
+  }, delay);
+}
+`;
+
+let swReg = null;
+
+async function registerSW(){
+  if(!('serviceWorker' in navigator)) return null;
+  try {
+    const blob = new Blob([SW_CODE], {type:'application/javascript'});
+    const url = URL.createObjectURL(blob);
+    swReg = await navigator.serviceWorker.register(url, {scope: '/'});
+    return swReg;
+  } catch(e) {
+    // Blob SW may be blocked on some browsers — fall back to timeout-based
+    return null;
+  }
+}
+
+function getNotifySettings(){
+  try { return JSON.parse(localStorage.getItem('steph_notify')||'{}'); } catch{ return {}; }
+}
+function saveNotifySettings(s){ localStorage.setItem('steph_notify', JSON.stringify(s)); }
+
+function getDailyQuestion(){
+  const today = new Date().toDateString();
+  const saved = getNotifySettings();
+  if(saved.todayQ && saved.todayDate === today) return saved.todayQ;
+  const q = TRIVIA[Math.floor(Math.random() * TRIVIA.length)];
+  saveNotifySettings({...saved, todayQ: q, todayDate: today});
+  return q;
+}
+
+function renderPreview(){
+  const q = getDailyQuestion();
+  document.getElementById('previewQ').innerHTML = `
+    <div class="pq-label">Today's Question</div>
+    <div class="pq-text">${esc(q.q)}</div>
+    <div class="pq-opts">
+      ${q.opts.map((o,i)=>`<div class="pq-opt${i===q.c?' ans':''}">${i===q.c?'✅ ':''}${esc(o)}</div>`).join('')}
+    </div>
+  `;
+}
+
+function refreshPreview(){
+  const q = TRIVIA[Math.floor(Math.random() * TRIVIA.length)];
+  const saved = getNotifySettings();
+  saveNotifySettings({...saved, todayQ: q, todayDate: new Date().toDateString()});
+  renderPreview();
+}
+
+function updateNotifyUI(){
+  const s = getNotifySettings();
+  const perm = Notification.permission;
+  const enabled = s.enabled && perm === 'granted';
+  const dot = document.getElementById('nsDot');
+  const text = document.getElementById('nsText');
+  const status = document.getElementById('notifyStatus');
+  const enableBtn = document.getElementById('enableBtn');
+  const disableBtn = document.getElementById('disableBtn');
+
+  if(perm === 'denied'){
+    dot.className='ns-dot off'; status.className='notify-status off';
+    text.textContent = '🚫 Blocked — please allow notifications in browser settings';
+    enableBtn.disabled = true; disableBtn.style.display='none';
+  } else if(enabled){
+    dot.className='ns-dot on'; status.className='notify-status on';
+    const t = s.time||'09:00';
+    text.textContent = `✅ Active — daily question at ${t}`;
+    enableBtn.style.display='none'; disableBtn.style.display='block';
+  } else {
+    dot.className='ns-dot off'; status.className='notify-status off';
+    text.textContent = 'Notifications not enabled yet';
+    enableBtn.style.display='block'; enableBtn.disabled=false; disableBtn.style.display='none';
+  }
+
+  const stored = s.time||'09:00';
+  document.getElementById('notifyTime').value = stored;
+}
+
+async function enableNotifications(){
+  if(!('Notification' in window)){
+    toast('⚠️ Your browser does not support notifications');
+    return;
+  }
+  const btn = document.getElementById('enableBtn');
+  btn.disabled = true; btn.textContent = 'Requesting permission...';
+
+  const perm = await Notification.requestPermission();
+  if(perm !== 'granted'){
+    toast('⚠️ Permission denied. Enable notifications in your browser settings.');
+    btn.disabled = false; btn.textContent = '🔔 Enable Daily Reminders';
+    updateNotifyUI(); return;
+  }
+
+  const time = document.getElementById('notifyTime').value || '09:00';
+  const q = getDailyQuestion();
+  saveNotifySettings({enabled:true, time, todayQ:q, todayDate:new Date().toDateString()});
+
+  // Register SW and schedule
+  const reg = await registerSW();
+  if(reg && navigator.serviceWorker.controller){
+    navigator.serviceWorker.controller.postMessage({type:'SCHEDULE', time, question:q});
+  }
+
+  // Fallback: also schedule in-page for current session
+  scheduleInPage(time);
+
+  // Show a test notification immediately
+  new Notification('👁️ Daily Reminders Enabled!', {
+    body: `You'll get your daily optometry question at ${time} every day 🧠`,
+    icon: 'https://cdn.jsdelivr.net/npm/twemoji@14/assets/72x72/1f441.png',
+    tag: 'notify-confirm'
+  });
+
+  updateNotifyUI();
+  toast('✅ Daily reminders enabled at '+time+'!');
+}
+
+function disableNotifications(){
+  const s = getNotifySettings();
+  saveNotifySettings({...s, enabled:false});
+  if(pageNotifyTimer) clearTimeout(pageNotifyTimer);
+  updateNotifyUI();
+  toast('🔕 Daily reminders turned off');
+}
+
+// In-page fallback scheduler (works while tab is open)
+let pageNotifyTimer = null;
+function scheduleInPage(timeStr){
+  if(pageNotifyTimer) clearTimeout(pageNotifyTimer);
+  const [h,m] = timeStr.split(':').map(Number);
+  const now = new Date();
+  const next = new Date();
+  next.setHours(h,m,0,0);
+  if(next <= now) next.setDate(next.getDate()+1);
+  const delay = next - now;
+  pageNotifyTimer = setTimeout(()=>{
+    const q = TRIVIA[Math.floor(Math.random()*TRIVIA.length)];
+    if(Notification.permission==='granted'){
+      new Notification('👁️ Daily Optometry Q — Steph!', {
+        body: q.q + '\n\nAnswer: ' + q.opts[q.c],
+        icon: 'https://cdn.jsdelivr.net/npm/twemoji@14/assets/72x72/1f441.png',
+        tag: 'daily-q',
+        requireInteraction: true
+      });
+    }
+    // Reschedule for next day
+    scheduleInPage(timeStr);
+  }, delay);
+}
+
+// Re-schedule on load if enabled
+(async function initNotify(){
+  const s = getNotifySettings();
+  if(s.enabled && Notification.permission==='granted'){
+    scheduleInPage(s.time||'09:00');
+    const reg = await registerSW();
+    if(reg) {
+      navigator.serviceWorker.ready.then(r=>{
+        if(r.active) r.active.postMessage({type:'SCHEDULE', time:s.time||'09:00', question: getDailyQuestion()});
+      });
+    }
+  }
+})();
 
 // ─────────────────────────────────────────────
 //  UTILS
