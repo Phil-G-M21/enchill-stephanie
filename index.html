@@ -320,69 +320,101 @@
     }
     .disable-btn:hover{background:rgba(255,77,109,.1);}
 
+    /* ── HAMBURGER DRAWER ── */
+    .burger{
+      display:none;flex-direction:column;justify-content:center;gap:5px;
+      background:transparent;border:none;cursor:pointer;padding:8px;
+      -webkit-tap-highlight-color:transparent;z-index:201;
+    }
+    .burger span{
+      display:block;width:24px;height:2.5px;background:var(--teal);
+      border-radius:2px;transition:all .28s ease;transform-origin:center;
+    }
+    .burger.open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+    .burger.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+    .burger.open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+
+    .drawer-overlay{
+      display:none;position:fixed;inset:0;z-index:199;
+      background:rgba(0,0,0,.55);backdrop-filter:blur(3px);
+    }
+    .drawer-overlay.open{display:block;}
+
+    .drawer{
+      position:fixed;top:0;right:0;bottom:0;z-index:200;
+      width:min(300px,85vw);
+      background:var(--surface2);
+      border-left:1px solid rgba(0,212,190,.12);
+      transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+      display:flex;flex-direction:column;padding-top:70px;overflow-y:auto;
+    }
+    .drawer.open{transform:translateX(0);}
+
+    .drawer-logo{
+      padding:0 24px 24px;border-bottom:1px solid rgba(255,255,255,.06);
+      font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--teal);
+      display:flex;align-items:center;gap:8px;
+    }
+    .d-nav-items{padding:16px 12px;flex:1;}
+    .d-item{
+      display:flex;align-items:center;gap:14px;
+      width:100%;background:transparent;border:none;
+      font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;
+      color:var(--muted);padding:14px 16px;border-radius:12px;
+      cursor:pointer;text-align:left;transition:all .18s;
+      -webkit-tap-highlight-color:transparent;
+      margin-bottom:4px;
+    }
+    .d-item:hover,.d-item.on{background:rgba(0,212,190,.1);color:var(--teal);}
+    .d-item.on{border-left:3px solid var(--teal);padding-left:13px;}
+    .d-item .d-icon{font-size:1.35rem;width:28px;text-align:center;flex-shrink:0;}
+    .d-item.d-yellow{color:var(--muted);}
+    .d-item.d-yellow:hover,.d-item.d-yellow.on{background:rgba(255,214,10,.1);color:var(--yellow);border-color:var(--yellow);}
+    .d-item.d-purple{color:var(--muted);}
+    .d-item.d-purple:hover,.d-item.d-purple.on{background:rgba(168,85,247,.1);color:var(--purple);border-color:var(--purple);}
+    .d-divider{height:1px;background:rgba(255,255,255,.06);margin:8px 16px;}
+    .d-key-row{display:flex;align-items:center;gap:8px;}
+    .d-key-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+    .d-key-dot.set{background:#4ade80;}
+    .drawer-footer{
+      padding:16px 24px;border-top:1px solid rgba(255,255,255,.06);
+      font-size:.75rem;color:var(--muted);text-align:center;opacity:.6;
+    }
+
     /* ── RESPONSIVE ── */
     @media(max-width:768px){
-      /* Nav — hamburger-style scrollable row */
-      nav{padding:10px 14px;flex-wrap:nowrap;gap:6px;}
-      .nav-logo{font-size:1rem;gap:5px;}
-      .nav-links{
-        gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;
-        scrollbar-width:none;padding-bottom:2px;flex-shrink:0;
-      }
-      .nav-links::-webkit-scrollbar{display:none;}
-      .nbtn{padding:6px 11px;font-size:.75rem;white-space:nowrap;flex-shrink:0;}
-
-      /* Pages */
-      .page{padding:80px 14px 56px;}
+      .nav-links{display:none;}
+      .burger{display:flex;}
+      nav{padding:10px 16px;justify-content:space-between;}
+      .nav-logo{font-size:1.05rem;}
+      .page{padding:72px 14px 40px;}
       .inner{max-width:100%;}
-
-      /* Hero */
       .hero h1{font-size:clamp(1.8rem,7vw,2.6rem);}
       .hero p{font-size:.92rem;}
       .hero-btns{flex-direction:column;gap:10px;}
       .hero-btns .btn-p,.hero-btns .btn-s{width:100%;text-align:center;}
       .hero-eye{font-size:3.8rem;}
-
-      /* Section titles */
       .sec-title{font-size:1.7rem;}
-
-      /* How pills */
       .how-pills{flex-direction:column;gap:8px;}
       .hw{padding:10px 14px;}
-
-      /* Upload zone */
       .drop-zone{padding:28px 16px;}
       .dz-icon{font-size:2rem;}
-
-      /* Options row */
       .opts-row{grid-template-columns:1fr 1fr;gap:10px;}
       .opt-g:last-child{grid-column:1/-1;}
-
-      /* AI toggle row */
       .ai-toggle-row{flex-wrap:wrap;gap:10px;}
       .ai-toggle-left{flex:1;min-width:0;}
       .ai-label{font-size:.88rem;}
       .ai-sub{font-size:.72rem;}
-
-      /* Quiz cards */
       .q-card{padding:18px 14px;}
       .q-text{font-size:.97rem;}
       .q-opt{font-size:.84rem;padding:10px 12px;}
       .quiz-bar{flex-wrap:wrap;gap:8px;}
-
-      /* Results */
       .results-wrap{padding:28px 16px;}
       .res-score{font-size:2.6rem;}
-
-      /* Games grid */
       .games-grid{grid-template-columns:1fr;gap:16px;}
       .g-card{padding:20px 16px;}
-
-      /* Snellen */
       .sn-disp{height:110px;}
       .sn-inp{font-size:1.2rem;padding:8px;}
-
-      /* Notify page */
       .notify-card{padding:20px 14px;}
       .notify-hero h2{font-size:1.6rem;}
       .notify-hero p{font-size:.88rem;}
@@ -390,28 +422,17 @@
       .time-inp{width:120px;font-size:1rem;}
       .big-enable-btn{font-size:.95rem;padding:13px;}
       .pq-opt{font-size:.8rem;padding:8px 10px;}
-
-      /* Modals */
       .modal{padding:22px 18px;max-width:100%;margin:14px;}
       .modal h2{font-size:1.3rem;}
       .modal-btns{flex-direction:column-reverse;gap:8px;}
       .modal-btns button{width:100%;}
       .steps{font-size:.79rem;line-height:1.7;}
-
-      /* Trivia & Rx & AF in games */
       .tr-q{font-size:.88rem;}
       .tr-opt{font-size:.8rem;padding:8px 11px;}
-
-      /* Gen button */
       .gen-btn{font-size:.98rem;padding:14px;}
-
-      /* File pill */
       .fp-name{font-size:.85rem;}
-
-      /* Score badges */
       .q-score-badge,.q-counter{font-size:.76rem;}
     }
-
     @media(max-width:400px){
       .nav-logo-text{display:none;}
       .hero h1{font-size:1.6rem;}
@@ -420,15 +441,42 @@
       .hero-eye{font-size:3rem;}
       .notify-hero .n-icon{font-size:3rem;}
     }
-
-    /* Touch-friendly tap targets */
     @media(hover:none){
-      .q-opt,.tr-opt,.btn-p,.btn-s,.nbtn,.gen-btn{min-height:44px;}
+      .q-opt,.tr-opt,.btn-p,.btn-s,.gen-btn,.d-item{min-height:46px;}
       .q-opt:active{transform:scale(.98);}
     }
   </style>
 </head>
 <body>
+
+<!-- BOTTOM TAB BAR (mobile) -->
+<!-- HAMBURGER DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-logo"><span class="eye-blink">👁️</span> Steph's Study Space</div>
+  <div class="d-nav-items">
+    <button class="d-item on" id="d-home" onclick="showPage('home');closeDrawer()">
+      <span class="d-icon">🏠</span> Home
+    </button>
+    <button class="d-item" id="d-quiz" onclick="showPage('quiz');closeDrawer()">
+      <span class="d-icon">📚</span> Quiz Me
+    </button>
+    <button class="d-item" id="d-games" onclick="showPage('games');closeDrawer()">
+      <span class="d-icon">🎮</span> Games
+    </button>
+    <div class="d-divider"></div>
+    <button class="d-item d-yellow" id="d-notify" onclick="showPage('notify');closeDrawer()">
+      <span class="d-icon">🔔</span> Daily Question
+    </button>
+    <button class="d-item d-purple" id="d-aikey" onclick="openKeyModal();closeDrawer()">
+      <span class="d-icon">🤖</span>
+      <div class="d-key-row">
+        <span class="d-key-dot" id="drawerKeyDot"></span> Groq AI
+      </div>
+    </button>
+  </div>
+  <div class="drawer-footer">Made with ❤️ by Phil for Stephanie</div>
+</div>
 
 <div class="bg-grid"></div>
 <div class="bg-orbs">
@@ -450,6 +498,9 @@
       <span class="key-dot" id="navKeyDot"></span>Groq AI
     </button>
   </div>
+  <button class="burger" id="burgerBtn" onclick="toggleDrawer()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- HOME -->
@@ -760,9 +811,28 @@ function showPage(id) {
     document.getElementById('pg-'+p).style.display = p===id ? '' : 'none';
     const nb = document.getElementById('nb-'+p);
     if(nb) nb.className = 'nbtn'+(p===id?' on':'');
+    const db = document.getElementById('d-'+p);
+    if(db){ db.className = db.className.replace(/\bon\b/,'').trim(); if(p===id) db.className += ' on'; }
   });
   window.scrollTo(0,0);
   if(id==='notify'){ renderPreview(); updateNotifyUI(); }
+}
+
+function toggleDrawer(){
+  const open = document.getElementById('drawer').classList.contains('open');
+  open ? closeDrawer() : openDrawer();
+}
+function openDrawer(){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('burgerBtn').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('burgerBtn').classList.remove('open');
+  document.body.style.overflow='';
 }
 
 // ─────────────────────────────────────────────
@@ -1316,10 +1386,14 @@ document.getElementById('keyModal').addEventListener('click',function(e){if(e.ta
 
 function updateKeyDots(){
   const has=!!getGroqKey();
-  document.getElementById('keyDot').className='key-dot'+(has?' set':'');
-  document.getElementById('navKeyDot').className='key-dot'+(has?' set':'');
+  const kd=document.getElementById('keyDot');
+  if(kd) kd.className='key-dot'+(has?' set':'');
+  const nd=document.getElementById('navKeyDot');
+  if(nd) nd.className='key-dot'+(has?' set':'');
+  const dd=document.getElementById('drawerKeyDot');
+  if(dd) dd.className='d-key-dot'+(has?' set':'');
   const kb=document.getElementById('keyInput');
-  if(kb)kb.value=getGroqKey();
+  if(kb) kb.value=getGroqKey();
 }
 updateKeyDots();
 
