@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>👁️ Steph's Study Space</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#060d1a; --surface:#0e1e35; --surface2:#162844;
+      --teal:#00d4be; --accent:#ff4d6d; --yellow:#ffd60a; --purple:#a855f7;
+      --text:#e8f4f8; --muted:#6b8cad; --rad:16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+    .bg-grid{
+      position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image:linear-gradient(rgba(0,212,190,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,190,.03) 1px,transparent 1px);
+      background-size:44px 44px;
+      mask-image:radial-gradient(ellipse at center,black 20%,transparent 80%);
+    }
+    .bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orbFloat ease-in-out infinite alternate;}
+    @keyframes orbFloat{from{transform:translateY(0) scale(1);}to{transform:translateY(-40px) scale(1.08);}}
+
+    nav{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 40px;background:rgba(6,13,26,.85);backdrop-filter:blur(18px);
+      border-bottom:1px solid rgba(0,212,190,.1);
+    }
+    .nav-logo{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--teal);display:flex;align-items:center;gap:8px;cursor:pointer;}
+    .eye-blink{display:inline-block;animation:wink 5s infinite;}
+    @keyframes wink{0%,85%,100%{transform:scaleY(1);}90%{transform:scaleY(0.06);}}
+    .nav-links{display:flex;gap:6px;}
+    .nbtn{
+      font-family:'Nunito',sans-serif;font-weight:800;font-size:.85rem;
+      padding:8px 18px;border-radius:50px;border:1.5px solid transparent;
+      color:var(--muted);background:transparent;cursor:pointer;transition:all .2s;
+    }
+    .nbtn:hover,.nbtn.on{color:var(--teal);border-color:rgba(0,212,190,.3);background:rgba(0,212,190,.07);}
+
+    .page{min-height:100vh;position:relative;z-index:1;padding:96px 40px 64px;}
+    .inner{max-width:860px;margin:0 auto;}
+
+    /* HOME */
+    #pg-home{display:flex;align-items:center;justify-content:center;}
+    .hero{text-align:center;max-width:640px;}
+    .hero-eye{font-size:5rem;display:inline-block;margin-bottom:16px;animation:eyePulse 3s ease-in-out infinite;}
+    @keyframes eyePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+    .hero h1{font-family:'Fredoka One',cursive;font-size:clamp(2.2rem,6vw,3.6rem);line-height:1.08;margin-bottom:12px;}
+    .hero h1 .hi{color:var(--teal);}
+    .hero h1 .nm{color:var(--yellow);text-shadow:0 0 40px rgba(255,214,10,.35);}
+    .hero p{font-size:1.05rem;color:var(--muted);margin-bottom:36px;line-height:1.7;}
+    .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+    .love-note{margin-top:48px;font-size:.84rem;color:var(--muted);opacity:.65;}
+    .love-note .h{color:var(--accent);}
+    .love-note .p{color:var(--teal);font-weight:800;}
+
+    .btn-p{
+      font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;
+      padding:13px 28px;border:none;border-radius:50px;cursor:pointer;
+      background:linear-gradient(135deg,var(--teal),#00a899);color:#060d1a;
+      transition:all .2s;box-shadow:0 4px 20px rgba(0,212,190,.25);
+    }
+    .btn-p:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,212,190,.4);}
+    .btn-s{
+      font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;
+      padding:12px 28px;border:2px solid var(--accent);border-radius:50px;cursor:pointer;
+      background:rgba(255,77,109,.08);color:var(--accent);transition:all .2s;
+    }
+    .btn-s:hover{background:rgba(255,77,109,.2);transform:translateY(-3px);}
+
+    /* SECTION */
+    .sec-head{margin-bottom:28px;}
+    .sec-title{font-family:'Fredoka One',cursive;font-size:2.1rem;margin-bottom:4px;}
+    .sec-title span{color:var(--teal);}
+    .sec-sub{color:var(--muted);font-size:.96rem;line-height:1.6;}
+
+    /* HOW IT WORKS */
+    .how-pills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
+    .hw{
+      background:var(--surface);border:1px solid rgba(0,212,190,.18);
+      border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:10px;
+      font-size:.85rem;color:var(--muted);
+    }
+    .hw .ico{font-size:1.2rem;}
+    .hw strong{color:var(--text);}
+
+    /* UPLOAD */
+    .drop-zone{
+      border:2px dashed rgba(0,212,190,.28);border-radius:var(--rad);
+      padding:44px;text-align:center;cursor:pointer;transition:all .2s;
+      background:rgba(0,212,190,.018);position:relative;margin-bottom:18px;
+    }
+    .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+    .drop-zone:hover,.drop-zone.over{border-color:var(--teal);background:rgba(0,212,190,.07);}
+    .dz-icon{font-size:2.6rem;margin-bottom:10px;}
+    .drop-zone h3{font-family:'Fredoka One',cursive;font-size:1.25rem;margin-bottom:5px;}
+    .drop-zone p{color:var(--muted);font-size:.85rem;}
+
+    .file-pill{
+      display:flex;align-items:center;gap:12px;
+      background:var(--surface);border:1px solid rgba(0,212,190,.18);
+      border-radius:12px;padding:11px 15px;margin-bottom:16px;
+    }
+    .fp-icon{font-size:1.4rem;}
+    .fp-name{font-weight:800;font-size:.92rem;}
+    .fp-size{color:var(--muted);font-size:.78rem;}
+    .fp-rm{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;transition:color .15s;}
+    .fp-rm:hover{color:var(--accent);}
+
+    .opts-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px;}
+    .opt-g label{display:block;font-size:.73rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--teal);margin-bottom:6px;}
+    .opt-g select{
+      width:100%;background:var(--surface);border:1px solid rgba(0,212,190,.18);
+      border-radius:10px;color:var(--text);font-family:'Nunito',sans-serif;
+      font-size:.9rem;padding:10px 12px;cursor:pointer;
+    }
+    .opt-g select:focus{outline:none;border-color:var(--teal);}
+
+    .gen-btn{
+      width:100%;font-family:'Nunito',sans-serif;font-weight:800;font-size:1.05rem;
+      padding:15px;border:none;border-radius:12px;cursor:pointer;
+      background:linear-gradient(135deg,var(--teal),#00a899);color:#060d1a;
+      transition:all .2s;box-shadow:0 4px 20px rgba(0,212,190,.2);
+    }
+    .gen-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,212,190,.38);}
+    .gen-btn:disabled{opacity:.45;cursor:not-allowed;}
+
+    .gen-prog{display:none;margin-top:20px;}
+    .gen-prog.on{display:block;}
+    .gp-wrap{height:6px;background:rgba(0,212,190,.1);border-radius:3px;overflow:hidden;margin-bottom:10px;}
+    .gp-bar{height:100%;background:var(--teal);border-radius:3px;transition:width .3s ease;width:0%;}
+    .gp-label{font-size:.85rem;color:var(--muted);font-style:italic;text-align:center;}
+
+    .err{background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);border-radius:10px;padding:12px 16px;color:#ff8a9a;font-size:.88rem;margin:12px 0;display:none;}
+    .err.on{display:block;}
+
+    /* QUIZ */
+    .quiz-area{display:none;}
+    .quiz-area.on{display:block;}
+    .quiz-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;}
+    .q-counter{font-family:'Space Mono',monospace;font-size:.83rem;color:var(--teal);}
+    .q-score-badge{font-family:'Space Mono',monospace;font-size:.83rem;background:var(--surface);border:1px solid rgba(255,214,10,.3);border-radius:50px;padding:6px 14px;color:var(--yellow);}
+    .q-type-badge{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:5px 12px;border-radius:50px;}
+    .type-mc{background:rgba(0,212,190,.12);color:var(--teal);}
+    .type-tf{background:rgba(168,85,247,.12);color:var(--purple);}
+    .type-fb{background:rgba(255,214,10,.1);color:var(--yellow);}
+
+    .q-card{background:var(--surface);border:1px solid rgba(255,255,255,.05);border-radius:var(--rad);padding:26px;margin-bottom:12px;animation:cardIn .25s ease;}
+    @keyframes cardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .q-num-label{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+    .q-text{font-size:1.05rem;font-weight:700;line-height:1.55;margin-bottom:18px;}
+    .q-opts{display:flex;flex-direction:column;gap:8px;}
+    .q-opt{
+      background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.07);
+      border-radius:10px;color:var(--text);font-family:'Nunito',sans-serif;
+      font-weight:600;font-size:.9rem;padding:11px 15px;cursor:pointer;text-align:left;transition:all .15s;
+      display:flex;align-items:center;gap:10px;
+    }
+    .q-opt:hover:not(:disabled){background:rgba(0,212,190,.08);border-color:rgba(0,212,190,.35);}
+    .q-opt.correct{background:rgba(0,212,190,.18)!important;border-color:var(--teal)!important;color:var(--teal);}
+    .q-opt.wrong{background:rgba(255,77,109,.18)!important;border-color:var(--accent)!important;color:#ff8a9a;}
+    .opt-lbl{background:rgba(255,255,255,.08);border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:.68rem;flex-shrink:0;}
+    .q-explain{margin-top:12px;padding:10px 14px;font-size:.83rem;color:var(--muted);background:rgba(0,212,190,.06);border-left:3px solid var(--teal);border-radius:5px;display:none;line-height:1.6;}
+    .q-explain.on{display:block;}
+
+    .results-wrap{background:var(--surface);border:1px solid rgba(255,214,10,.18);border-radius:var(--rad);padding:44px;text-align:center;animation:cardIn .3s ease;margin-top:16px;}
+    .res-emoji{font-size:3.8rem;margin-bottom:12px;}
+    .res-score{font-family:'Fredoka One',cursive;font-size:3.5rem;color:var(--yellow);}
+    .res-pct{font-size:1rem;font-weight:700;margin:4px 0 8px;}
+    .res-msg{color:var(--muted);margin-bottom:28px;font-size:.95rem;line-height:1.6;}
+
+    /* GAMES */
+    .games-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+    .g-card{background:var(--surface);border:1px solid rgba(255,255,255,.05);border-radius:var(--rad);padding:26px;transition:border-color .2s;}
+    .g-card:hover{border-color:rgba(0,212,190,.2);}
+    .g-icon{font-size:2.2rem;margin-bottom:10px;}
+    .g-card h3{font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:5px;}
+    .g-card>p{color:var(--muted);font-size:.85rem;margin-bottom:18px;line-height:1.55;}
+
+    /* Snellen */
+    .sn-disp{background:#ede8d8;border-radius:12px;height:136px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;overflow:hidden;}
+    .sn-ltr{font-family:'Space Mono',monospace;font-weight:700;color:#111;transition:font-size .04s linear;}
+    .tbar{height:4px;background:rgba(0,212,190,.12);border-radius:2px;margin-bottom:10px;}
+    .tbar-fill{height:100%;border-radius:2px;transition:width .05s linear,background .1s;}
+    .sn-row{display:flex;gap:8px;}
+    .sn-inp{flex:1;background:var(--bg);border:2px solid rgba(0,212,190,.3);border-radius:10px;color:var(--text);font-family:'Space Mono',monospace;font-size:1.5rem;padding:10px;text-align:center;text-transform:uppercase;letter-spacing:4px;}
+    .sn-inp:focus{outline:none;border-color:var(--teal);}
+    .sn-stats{display:flex;gap:8px;margin-top:8px;}
+    .sn-pill{background:var(--bg);border-radius:50px;padding:5px 12px;font-family:'Space Mono',monospace;font-size:.74rem;color:var(--muted);}
+    .sn-result{text-align:center;padding:6px 0;}
+    .sn-big{font-family:'Fredoka One',cursive;font-size:2.4rem;color:var(--yellow);}
+    .sn-msg{color:var(--muted);font-size:.88rem;margin:6px 0 16px;}
+
+    /* Trivia */
+    .tr-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+    .tr-prog{font-family:'Space Mono',monospace;font-size:.74rem;color:var(--muted);}
+    .tr-badge{font-family:'Space Mono',monospace;font-size:.74rem;color:var(--yellow);background:var(--bg);border-radius:50px;padding:4px 12px;}
+    .tr-q{font-size:.93rem;font-weight:700;margin-bottom:12px;line-height:1.5;}
+    .tr-opts{display:flex;flex-direction:column;gap:7px;}
+    .tr-opt{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;color:var(--text);font-family:'Nunito',sans-serif;font-weight:600;font-size:.82rem;padding:9px 13px;cursor:pointer;text-align:left;transition:all .15s;}
+    .tr-opt:hover:not(:disabled){background:rgba(0,212,190,.08);border-color:rgba(0,212,190,.3);}
+    .tr-opt.correct{background:rgba(0,212,190,.18)!important;border-color:var(--teal)!important;color:var(--teal);}
+    .tr-opt.wrong{background:rgba(255,77,109,.18)!important;border-color:var(--accent)!important;}
+    .tr-fact{margin-top:8px;font-size:.78rem;color:var(--muted);background:rgba(0,212,190,.05);border-left:2px solid var(--teal);padding:8px 10px;border-radius:5px;display:none;line-height:1.5;}
+    .tr-fact.on{display:block;}
+    .tr-next{display:none;margin-top:10px;text-align:right;}
+    .btn-ghost{background:transparent;border:1.5px solid rgba(255,255,255,.12);border-radius:50px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;padding:7px 18px;cursor:pointer;font-size:.82rem;transition:all .15s;}
+    .btn-ghost:hover{border-color:rgba(255,255,255,.28);color:var(--text);}
+    .tr-result{text-align:center;padding:6px 0;}
+    .tr-big{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--yellow);}
+    .tr-msg{color:var(--muted);font-size:.88rem;margin:6px 0 14px;}
+
+    footer{position:relative;z-index:1;background:var(--surface);text-align:center;padding:26px;border-top:1px solid rgba(255,255,255,.04);}
+    footer p{color:var(--muted);font-size:.84rem;line-height:1.7;}
+    footer .fh{color:var(--accent);}
+    footer .fp{color:var(--teal);font-weight:800;}
+    footer .fs{color:var(--yellow);font-weight:800;}
+
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid rgba(0,212,190,.3);border-radius:50px;padding:11px 22px;font-weight:700;font-size:.85rem;z-index:500;white-space:nowrap;animation:toastIn .3s ease;}
+    @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+
+    /* AI MODE TOGGLE */
+    .ai-toggle-row{
+      display:flex;align-items:center;justify-content:space-between;
+      background:var(--surface);border:1.5px solid rgba(168,85,247,.25);
+      border-radius:14px;padding:14px 18px;margin-bottom:18px;
+      transition:border-color .2s;
+    }
+    .ai-toggle-row.active{border-color:var(--purple);background:rgba(168,85,247,.06);}
+    .ai-toggle-left{display:flex;align-items:center;gap:12px;}
+    .ai-icon{font-size:1.6rem;}
+    .ai-label{font-weight:800;font-size:.95rem;}
+    .ai-label span{color:var(--purple);}
+    .ai-sub{font-size:.78rem;color:var(--muted);margin-top:2px;}
+    .ai-sub .free{color:#4ade80;font-weight:800;}
+    .ai-toggle-right{display:flex;align-items:center;gap:10px;}
+    .key-btn{
+      font-family:'Nunito',sans-serif;font-weight:800;font-size:.78rem;
+      padding:7px 14px;border-radius:50px;cursor:pointer;transition:all .2s;
+      background:rgba(168,85,247,.12);border:1.5px solid rgba(168,85,247,.3);color:var(--purple);
+    }
+    .key-btn:hover{background:rgba(168,85,247,.22);}
+    .key-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:4px;transition:background .2s;}
+    .key-dot.set{background:#4ade80;}
+
+    /* Toggle switch */
+    .tog{position:relative;width:46px;height:26px;cursor:pointer;}
+    .tog input{opacity:0;width:0;height:0;}
+    .tog-sl{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:50px;transition:.3s;}
+    .tog-sl:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
+    .tog input:checked+.tog-sl{background:var(--purple);}
+    .tog input:checked+.tog-sl:before{transform:translateX(20px);}
+
+    /* Modal */
+    .modal-ov{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;}
+    .modal-ov.open{display:flex;}
+    .modal{background:var(--surface2);border-radius:20px;padding:32px;max-width:440px;width:90%;border:1px solid rgba(168,85,247,.25);animation:popIn .2s ease;}
+    @keyframes popIn{from{opacity:0;transform:scale(.94);}to{opacity:1;transform:scale(1);}}
+    .modal h2{font-family:'Fredoka One',cursive;font-size:1.5rem;margin-bottom:8px;}
+    .modal p{color:var(--muted);font-size:.86rem;line-height:1.6;margin-bottom:16px;}
+    .modal a{color:var(--teal);}
+    .modal input{width:100%;background:var(--bg);border:1px solid rgba(168,85,247,.3);border-radius:10px;color:var(--text);font-family:'Space Mono',monospace;font-size:.82rem;padding:11px 13px;margin-bottom:14px;}
+    .modal input:focus{outline:none;border-color:var(--purple);}
+    .modal-btns{display:flex;gap:10px;justify-content:flex-end;}
+    .btn-ghost{background:transparent;border:1.5px solid rgba(255,255,255,.12);border-radius:50px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;padding:9px 20px;cursor:pointer;font-size:.85rem;transition:all .15s;}
+    .btn-ghost:hover{border-color:rgba(255,255,255,.28);color:var(--text);}
+    .steps{background:rgba(0,212,190,.05);border:1px solid rgba(0,212,190,.15);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.82rem;line-height:1.8;color:var(--muted);}
+    .steps strong{color:var(--text);}
+    .model-note{font-size:.75rem;color:var(--muted);margin-top:8px;opacity:.7;}
+
+    @media(max-width:640px){
+      nav{padding:12px 16px;}
+      .page{padding:84px 16px 50px;}
+      .opts-row{grid-template-columns:1fr 1fr;}
+      .games-grid{grid-template-columns:1fr;}
+      .how-pills{flex-direction:column;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-orbs">
+  <div class="orb" style="width:420px;height:420px;top:-120px;left:-100px;background:rgba(0,212,190,.055);animation-duration:8s;"></div>
+  <div class="orb" style="width:320px;height:320px;bottom:10%;right:-80px;background:rgba(255,77,109,.04);animation-duration:11s;animation-delay:-4s;"></div>
+  <div class="orb" style="width:260px;height:260px;top:50%;left:55%;background:rgba(168,85,247,.035);animation-duration:9s;animation-delay:-2s;"></div>
+</div>
+
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">
+    <span class="eye-blink">👁️</span> Steph's Study Space
+  </div>
+  <div class="nav-links">
+    <button class="nbtn on" id="nb-home" onclick="showPage('home')">Home</button>
+    <button class="nbtn" id="nb-quiz" onclick="showPage('quiz')">📚 Quiz Me</button>
+    <button class="nbtn" id="nb-games" onclick="showPage('games')">🎮 Games</button>
+    <button class="nbtn" id="nb-aikey" onclick="openKeyModal()" style="border-color:rgba(168,85,247,.3);color:var(--purple);">
+      <span class="key-dot" id="navKeyDot"></span>Groq AI
+    </button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div class="page" id="pg-home">
+  <div class="inner hero">
+    <div class="hero-eye">👁️</div>
+    <h1><span class="hi">Hey</span> <span class="nm">Stephanie!</span><br/>Welcome to your study space ✨</h1>
+    <p>Upload your optometry notes and get an instant personalised quiz.<br/>Drop in a file, pick your settings, and start studying. 🩺</p>
+    <div class="hero-btns">
+      <button class="btn-p" onclick="showPage('quiz')">📄 Quiz Me From My Notes</button>
+      <button class="btn-s" onclick="showPage('games')">🎮 Play Games</button>
+    </div>
+    <p class="love-note">Made with <span class="h">❤️</span> by <span class="p">Phil</span> — just for you 💌</p>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="page" id="pg-quiz" style="display:none">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-title">📄 <span>Quiz</span> Me</div>
+      <p class="sec-sub">Drop in your notes and the quiz engine runs right in your browser — no data leaves your device.</p>
+    </div>
+
+    <div class="how-pills">
+      <div class="hw"><span class="ico">📑</span><div><strong>Upload any doc format</strong><br/>PDF, DOCX, PPTX, TXT, MD</div></div>
+      <div class="hw"><span class="ico">🧠</span><div><strong>Smart extraction</strong><br/>Finds key concepts automatically</div></div>
+      <div class="hw"><span class="ico">✨</span><div><strong>3 question types</strong><br/>MC, True/False & Fill-in-blank</div></div>
+    </div>
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".pdf,.txt,.docx,.doc,.pptx,.ppt,.md"/>
+      <div class="dz-icon">📂</div>
+      <h3>Drop your notes here</h3>
+      <p>PDF · DOCX · PPTX · TXT · MD · Processed entirely on your device · 100% private</p>
+    </div>
+
+    <div class="file-pill" id="filePill" style="display:none">
+      <span class="fp-icon" id="fpIcon">📄</span>
+      <div>
+        <div class="fp-name" id="fpName"></div>
+        <div class="fp-size" id="fpSize"></div>
+      </div>
+      <button class="fp-rm" onclick="clearFile()">✕</button>
+    </div>
+
+    <div class="opts-row">
+      <div class="opt-g">
+        <label>Questions</label>
+        <select id="numQ">
+          <option value="10" selected>10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+      <div class="opt-g">
+        <label>Difficulty</label>
+        <select id="diff">
+          <option value="easy">Easy 😊</option>
+          <option value="medium" selected>Medium 🤔</option>
+          <option value="hard">Hard 🔥</option>
+        </select>
+      </div>
+      <div class="opt-g">
+        <label>Question Types</label>
+        <select id="qmix">
+          <option value="all" selected>Mixed ✨</option>
+          <option value="mc">Multiple Choice</option>
+          <option value="tf">True / False</option>
+          <option value="fb">Fill in the Blank</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- AI MODE TOGGLE -->
+    <div class="ai-toggle-row" id="aiToggleRow">
+      <div class="ai-toggle-left">
+        <span class="ai-icon">🤖</span>
+        <div>
+          <div class="ai-label">Groq <span>AI Mode</span></div>
+          <div class="ai-sub">Better questions via Llama 3.3 · <span class="free">Free API</span> · <a href="#" onclick="openKeyModal();return false;">Get key →</a></div>
+        </div>
+      </div>
+      <div class="ai-toggle-right">
+        <button class="key-btn" onclick="openKeyModal()"><span class="key-dot" id="keyDot"></span>Set Key</button>
+        <label class="tog"><input type="checkbox" id="aiToggle" onchange="toggleAI()"/><span class="tog-sl"></span></label>
+      </div>
+    </div>
+
+    <button class="gen-btn" id="genBtn" onclick="buildQuiz()" disabled>✨ Generate My Quiz</button>
+
+    <div class="err" id="errBox"></div>
+
+    <div class="gen-prog" id="genProg">
+      <div class="gp-wrap"><div class="gp-bar" id="gpBar"></div></div>
+      <div class="gp-label" id="gpLabel">Parsing notes...</div>
+    </div>
+
+    <div class="quiz-area" id="quizArea"></div>
+  </div>
+</div>
+
+<!-- GAMES -->
+<div class="page" id="pg-games" style="display:none">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-title">🎮 <span>Games</span></div>
+      <p class="sec-sub">Study break time! Four optometry-themed games to keep the brain fresh 🧠</p>
+    </div>
+    <div class="games-grid">
+
+      <!-- Snellen Sprint -->
+      <div class="g-card">
+        <div class="g-icon">🔤</div>
+        <h3>Snellen Sprint</h3>
+        <p>Letters shrink like a real eye chart! Type them before they disappear. 60 seconds, go!</p>
+        <div id="sn-start"><button class="btn-p" style="width:100%;padding:12px" onclick="snellenStart()">▶ Start</button></div>
+        <div id="sn-play" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <span style="font-family:'Space Mono',monospace;font-size:.74rem;color:var(--muted)">⏱ <span id="snTime">60</span>s</span>
+            <div class="sn-stats" style="margin:0"><span class="sn-pill">🏆 <span id="snPts">0</span></span><span class="sn-pill">🎯 <span id="snAcc">100</span>%</span></div>
+          </div>
+          <div class="tbar"><div class="tbar-fill" id="snLBar" style="width:100%;background:var(--teal)"></div></div>
+          <div class="sn-disp"><span class="sn-ltr" id="snLtr" style="font-size:72px">E</span></div>
+          <div class="sn-row"><input class="sn-inp" id="snInp" type="text" maxlength="2" placeholder="?" autocomplete="off" oninput="snInput(event)"/></div>
+        </div>
+        <div id="sn-result" style="display:none" class="sn-result">
+          <div class="sn-big">🏆 <span id="snFPts">0</span></div>
+          <div class="sn-msg" id="snRating"></div>
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:14px">Accuracy: <span id="snFAcc">0</span>%</div>
+          <button class="btn-p" style="width:100%;padding:11px;font-size:.9rem" onclick="snellenStart()">▶ Play Again</button>
+        </div>
+      </div>
+
+      <!-- OD Trivia -->
+      <div class="g-card">
+        <div class="g-icon">🧠</div>
+        <h3>OD Trivia</h3>
+        <p>80 optometry questions from cornea to cortex. How many can you nail in a row?</p>
+        <div id="tr-start"><button class="btn-s" style="width:100%;padding:12px" onclick="triviaStart()">▶ Start Trivia</button></div>
+        <div id="tr-play" style="display:none">
+          <div class="tr-hd">
+            <span class="tr-prog" id="trProg">1 / 50</span>
+            <span class="tr-badge">⭐ <span id="trPts">0</span></span>
+          </div>
+          <div class="tr-q" id="trQ"></div>
+          <div class="tr-opts" id="trOpts"></div>
+          <div class="tr-fact" id="trFact"></div>
+          <div class="tr-next" id="trNext"><button class="btn-ghost" onclick="triviaNext()">Next →</button></div>
+        </div>
+        <div id="tr-result" style="display:none" class="tr-result">
+          <div class="tr-big">⭐ <span id="trFPts">0</span> / 50</div>
+          <div class="tr-msg" id="trMsg"></div>
+          <button class="btn-s" onclick="triviaStart()">▶ Play Again</button>
+        </div>
+      </div>
+
+      <!-- Rx Decoder -->
+      <div class="g-card">
+        <div class="g-icon">👓</div>
+        <h3>Rx Decoder</h3>
+        <p>You're handed a prescription — can you decode what it means? Read fast, think faster!</p>
+        <div id="rx-start"><button class="btn-p" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--yellow),#e6a800);color:#060d1a" onclick="rxStart()">▶ Start</button></div>
+        <div id="rx-play" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-family:'Space Mono',monospace;font-size:.74rem;color:var(--muted)">Q <span id="rxIdx">1</span>/15</span>
+            <span class="sn-pill" style="color:var(--yellow)">⭐ <span id="rxScore">0</span></span>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:14px;text-align:center;margin-bottom:12px;font-family:'Space Mono',monospace;">
+            <div style="font-size:.7rem;color:var(--muted);margin-bottom:6px">PRESCRIPTION</div>
+            <div id="rxDisplay" style="font-size:1.15rem;color:var(--yellow);font-weight:700;letter-spacing:2px;line-height:1.8"></div>
+          </div>
+          <div class="tr-opts" id="rxOpts"></div>
+          <div class="tr-fact" id="rxFact"></div>
+          <div class="tr-next" id="rxNext" style="display:none;margin-top:10px;text-align:right">
+            <button class="btn-ghost" onclick="rxNext()">Next →</button>
+          </div>
+        </div>
+        <div id="rx-result" style="display:none" class="sn-result">
+          <div class="sn-big" style="color:var(--yellow)">⭐ <span id="rxFScore">0</span>/15</div>
+          <div class="sn-msg" id="rxMsg"></div>
+          <button class="btn-p" style="width:100%;padding:11px;font-size:.9rem;background:linear-gradient(135deg,var(--yellow),#e6a800);color:#060d1a" onclick="rxStart()">▶ Play Again</button>
+        </div>
+      </div>
+
+      <!-- Eye Anatomy Flash -->
+      <div class="g-card">
+        <div class="g-icon">🔬</div>
+        <h3>Anatomy Flash</h3>
+        <p>Flash cards for eye anatomy — see the structure, pick the function. Beat your streak!</p>
+        <div id="af-start"><button class="btn-s" style="width:100%;padding:12px;border-color:var(--teal);color:var(--teal)" onclick="afStart()">▶ Start</button></div>
+        <div id="af-play" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-family:'Space Mono',monospace;font-size:.74rem;color:var(--muted)">🔥 Streak: <span id="afStreak">0</span></span>
+            <span class="sn-pill" style="color:var(--teal)">Best: <span id="afBest">0</span></span>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(0,212,190,.12),rgba(0,212,190,.04));border:1px solid rgba(0,212,190,.25);border-radius:12px;padding:18px;text-align:center;margin-bottom:12px;min-height:80px;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+            <div style="font-size:.7rem;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Structure</div>
+            <div id="afTerm" style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text)"></div>
+          </div>
+          <div class="tr-opts" id="afOpts"></div>
+          <div class="tr-fact" id="afFact"></div>
+          <div class="tr-next" id="afNext" style="display:none;margin-top:10px;text-align:right">
+            <button class="btn-ghost" onclick="afNext()">Next →</button>
+          </div>
+        </div>
+        <div id="af-result" style="display:none" class="sn-result">
+          <div class="sn-big" style="color:var(--teal)">🔥 <span id="afFStreak">0</span></div>
+          <div class="sn-msg" id="afMsg"></div>
+          <button class="btn-s" style="width:100%;padding:11px;font-size:.9rem;border-color:var(--teal);color:var(--teal)" onclick="afStart()">▶ Play Again</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- GROQ KEY MODAL -->
+<div class="modal-ov" id="keyModal">
+  <div class="modal">
+    <h2>🤖 Set Groq API Key</h2>
+    <div class="steps">
+      <strong>How to get your FREE key (2 min):</strong><br/>
+      1. Go to <a href="https://console.groq.com" target="_blank">console.groq.com</a> → Sign Up<br/>
+      2. Click <strong>API Keys</strong> in the left sidebar<br/>
+      3. Hit <strong>Create API Key</strong> → Copy it<br/>
+      4. Paste it below ↓
+    </div>
+    <p>Your key is stored only in your browser. No credit card, no cost — completely free! 🎉</p>
+    <input type="password" id="keyInput" placeholder="gsk_..." />
+    <p class="model-note">Uses Llama 3.3 70B via Groq · 14,400 free requests/day</p>
+    <div class="modal-btns">
+      <button class="btn-ghost" onclick="closeKeyModal()">Cancel</button>
+      <button class="btn-p" style="font-size:.9rem;padding:10px 22px" onclick="saveKey()">Save Key ✓</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Made with <span class="fh">❤️</span> by <span class="fp">Phil</span> for <span class="fs">Stephanie</span> 👁️✨<br/>
+  <span style="font-size:.76rem;opacity:.55">100% private · runs in your browser · no data ever leaves your device</span></p>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────
+//  PDF.JS
+// ─────────────────────────────────────────────
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+// ─────────────────────────────────────────────
+//  NAV
+// ─────────────────────────────────────────────
+function showPage(id) {
+  ['home','quiz','games'].forEach(p => {
+    document.getElementById('pg-'+p).style.display = p===id ? '' : 'none';
+    const nb = document.getElementById('nb-'+p);
+    if(nb) nb.className = 'nbtn'+(p===id?' on':'');
+  });
+  window.scrollTo(0,0);
+}
+
+// ─────────────────────────────────────────────
+//  FILE
+// ─────────────────────────────────────────────
+let currentFile = null;
+const dz = document.getElementById('dropZone');
+const fi = document.getElementById('fileInput');
+
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+fi.addEventListener('change',()=>{if(fi.files[0])handleFile(fi.files[0]);});
+
+function handleFile(f){
+  const ext=f.name.split('.').pop().toLowerCase();
+  if(!['pdf','txt','docx','doc','pptx','ppt','md'].includes(ext)){toast('⚠️ Supported: PDF, DOCX, PPTX, TXT, MD');return;}
+  currentFile=f;
+  const icons={pdf:'📑',txt:'📝',docx:'📘',doc:'📘',pptx:'📊',ppt:'📊',md:'📋'};
+  document.getElementById('fpIcon').textContent=icons[ext]||'📄';
+  document.getElementById('fpName').textContent=f.name;
+  document.getElementById('fpSize').textContent=fmtSize(f.size);
+  document.getElementById('filePill').style.display='flex';
+  document.getElementById('genBtn').disabled=false;
+}
+
+function clearFile(){
+  currentFile=null;
+  document.getElementById('filePill').style.display='none';
+  fi.value='';
+  document.getElementById('genBtn').disabled=true;
+  document.getElementById('quizArea').className='quiz-area';
+  document.getElementById('quizArea').innerHTML='';
+  hideErr();
+}
+
+function fmtSize(b){return b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB';}
+
+async function extractText(f){
+  const ext=f.name.split('.').pop().toLowerCase();
+
+  // Plain text / Markdown
+  if(ext==='txt'||ext==='md'){
+    return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsText(f);});
+  }
+
+  // PDF
+  if(ext==='pdf'){
+    const buf=await f.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    let text='';
+    for(let i=1;i<=pdf.numPages;i++){
+      const pg=await pdf.getPage(i);
+      const c=await pg.getTextContent();
+      text+=c.items.map(x=>x.str).join(' ')+'\n';
+    }
+    return text;
+  }
+
+  // DOCX (and legacy .doc via mammoth — works on most .doc files)
+  if(ext==='docx'||ext==='doc'){
+    const buf=await f.arrayBuffer();
+    const result=await mammoth.extractRawText({arrayBuffer:buf});
+    return result.value;
+  }
+
+  // PPTX — unzip and pull text from slide XMLs
+  if(ext==='pptx'||ext==='ppt'){
+    try{
+      const buf=await f.arrayBuffer();
+      const zip=await JSZip.loadAsync(buf);
+      const slideFiles=Object.keys(zip.files)
+        .filter(name=>name.match(/^ppt\/slides\/slide\d+\.xml$/))
+        .sort((a,b)=>{
+          const na=parseInt(a.match(/\d+/)[0]);
+          const nb=parseInt(b.match(/\d+/)[0]);
+          return na-nb;
+        });
+      if(!slideFiles.length) throw new Error('No slides found in the PPTX file.');
+      let text='';
+      for(const name of slideFiles){
+        const xml=await zip.files[name].async('string');
+        // Extract all <a:t> text nodes
+        const matches=xml.match(/<a:t[^>]*>([^<]+)<\/a:t>/g)||[];
+        const slideText=matches.map(m=>m.replace(/<[^>]+>/g,'')).join(' ');
+        text+=slideText+'\n';
+      }
+      return text;
+    }catch(e){
+      throw new Error('Could not read PPTX: '+e.message+'. Try saving as .pptx (not .ppt).');
+    }
+  }
+
+  throw new Error('Unsupported file type: .'+ext);
+}
+
+// ─────────────────────────────────────────────
+//  QUIZ ENGINE — PURE CLIENT-SIDE
+// ─────────────────────────────────────────────
+let activeQuiz=[], quizAnswered=[], quizScore=0;
+
+function setProgress(pct,label){
+  document.getElementById('genProg').className='gen-prog on';
+  document.getElementById('gpBar').style.width=pct+'%';
+  document.getElementById('gpLabel').textContent=label;
+}
+
+async function buildQuiz(){
+  if(!currentFile){toast('⚠️ Upload a file first');return;}
+  const numQ=+document.getElementById('numQ').value;
+  const diff=document.getElementById('diff').value;
+  const mix=document.getElementById('qmix').value;
+  document.getElementById('quizArea').className='quiz-area';
+  document.getElementById('quizArea').innerHTML='';
+  hideErr();
+  setProgress(5,'📖 Reading your notes...');
+  document.getElementById('genBtn').disabled=true;
+  try{
+    const raw=await extractText(currentFile);
+    if(!raw.trim())throw new Error('Could not extract text. If it\'s a scanned PDF, try copying content to a .txt file. Old .ppt/.doc formats work best when re-saved as .pptx/.docx.');
+    setProgress(30,'🔍 Parsing content...');
+    await sleep(80);
+
+    let questions;
+
+    if(aiModeOn){
+      setProgress(55,'🤖 Asking Groq AI to build questions...');
+      questions=await buildQuizGroq(raw,numQ,diff,mix);
+      if(!questions||!questions.length)throw new Error('Groq returned no questions. Try again or switch to offline mode.');
+    } else {
+      const sentences=parseSentences(raw);
+      if(sentences.length<5)throw new Error('Not enough text content. Your notes need at least a page of readable text.');
+      setProgress(55,'🧠 Extracting key concepts...');
+      await sleep(80);
+      const concepts=extractConcepts(raw,sentences);
+      setProgress(75,'📝 Building questions...');
+      await sleep(80);
+      questions=generateQuestions(sentences,concepts,numQ,diff,mix);
+      if(questions.length===0)throw new Error('Could not generate enough questions. Try notes with more definition-style or factual content.');
+    }
+
+    setProgress(98,'✅ Almost ready...');
+    await sleep(150);
+    document.getElementById('genProg').className='gen-prog';
+    activeQuiz=questions.slice(0,numQ);
+    quizAnswered=new Array(activeQuiz.length).fill(false);
+    quizScore=0;
+    renderQuiz();
+    document.getElementById('quizArea').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){
+    document.getElementById('genProg').className='gen-prog';
+    showErr(e.message);
+  }finally{
+    document.getElementById('genBtn').disabled=false;
+  }
+}
+
+// ── PARSE ──
+function parseSentences(text){
+  const cleaned=text.replace(/\s+/g,' ').replace(/([a-z])-\s([a-z])/g,'$1$2').trim();
+  return cleaned
+    .split(/(?<=[.!?])\s+(?=[A-Z0-9])/)
+    .map(s=>s.trim())
+    .filter(s=>s.length>45&&s.length<500)
+    .filter(s=>/[a-zA-Z]{4,}/.test(s))
+    .filter(s=>s.split(/\s+/).length>7);
+}
+
+// ── CONCEPTS ──
+function extractConcepts(raw,sentences){
+  const stop=new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','this','that','these','those','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','could','should','may','might','shall','can','it','its','they','them','their','which','when','where','while','because','since','as','from','by','about','through','into','during','including','however','although','therefore','thus','hence','also','then','there','here','both','each','few','more','most','other','such','than','too','very','just','own','same','so','if','not','what','all','any','one','two','three','after','before','between','within','without','often','always','usually','typically','generally','commonly','important','used','using','called','known','found','seen','made','given','taken','shown','based','related','associated','different','various','many','some','several','another','first','second','third','main','major','primary','secondary','following','above','below','due','type','types','form','forms']);
+
+  const freq={};
+  // multi-word (capitalised phrases)
+  const mw=raw.match(/\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){1,2})\b/g)||[];
+  mw.forEach(t=>{if(t.length>5&&!stop.has(t.toLowerCase().split(' ')[0]))freq[t]=(freq[t]||0)+3;});
+  // single capitalised
+  const sw=raw.match(/\b([A-Z][a-z]{3,})\b/g)||[];
+  sw.forEach(t=>{if(!stop.has(t.toLowerCase()))freq[t]=(freq[t]||0)+1;});
+  // important lower-case nouns (appear 3+ times)
+  const lw=raw.toLowerCase().match(/\b([a-z]{5,})\b/g)||[];
+  const lfreq={};
+  lw.forEach(w=>{if(!stop.has(w))lfreq[w]=(lfreq[w]||0)+1;});
+  Object.entries(lfreq).filter(([,v])=>v>=3).forEach(([k,v])=>{
+    const proper=k.charAt(0).toUpperCase()+k.slice(1);
+    freq[proper]=(freq[proper]||0)+Math.min(v,5);
+  });
+
+  return Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,80).map(([t])=>t);
+}
+
+// ── GENERATE ──
+function generateQuestions(sentences,concepts,target,diff,mix){
+  const pool=[];
+  const typePool=mix==='all'?['mc','mc','mc','tf','fb']:mix==='mc'?['mc']:mix==='tf'?['tf']:['fb'];
+  const usedSentences=new Set();
+
+  for(let attempt=0;attempt<800&&pool.length<target*3;attempt++){
+    const type=typePool[Math.floor(Math.random()*typePool.length)];
+    const sent=sentences[Math.floor(Math.random()*sentences.length)];
+    if(usedSentences.has(sent))continue;
+    let q=null;
+    if(type==='mc') q=makeMC(sent,sentences,concepts,diff);
+    else if(type==='tf') q=makeTF(sent,sentences,diff);
+    else q=makeFB(sent,sentences,concepts,diff);
+    if(q){pool.push(q);usedSentences.add(sent);}
+  }
+  return shuffle(pool).slice(0,target);
+}
+
+function makeMC(sent,all,concepts,diff){
+  // Definition-style
+  const dm=sent.match(/^(.{8,70}?)\s+(?:is|are|is defined as|refers to|means|consists of)\s+(.{15,})/i);
+  if(dm){
+    const subj=dm[1].replace(/^(The|A|An)\s+/i,'').trim();
+    const def=dm[2].replace(/[.;]$/,'').trim();
+    if(subj.length<4||def.length<10)return null;
+    const distractors=getDistractors(def,all,3);
+    if(distractors.length<3)return null;
+    const opts=shuffle([def,...distractors.slice(0,3)]);
+    return{type:'mc',question:`What is "${capFirst(subj)}"?`,options:opts,correct:opts.indexOf(def),explain:`From your notes: "${sent.slice(0,160)}"`};
+  }
+  // Concept-in-sentence
+  const term=concepts.find(c=>sent.includes(c)&&c.length>4&&sent.indexOf(c)>10);
+  if(term&&diff!=='easy'){
+    const before=sent.slice(0,sent.indexOf(term)).trim().slice(-70);
+    const after=sent.slice(sent.indexOf(term)+term.length).trim().slice(0,70);
+    if(before.length<8&&after.length<8)return null;
+    const dists=concepts.filter(c=>c!==term&&c.length>3&&!before.includes(c)&&!after.includes(c));
+    if(dists.length<3)return null;
+    const opts=shuffle([term,...shuffle(dists).slice(0,3)]);
+    return{type:'mc',question:`Fill the gap: "…${before} ___ ${after}…"`,options:opts,correct:opts.indexOf(term),explain:`From your notes: "${sent.slice(0,160)}"`};
+  }
+  // Association
+  const mainTerm=concepts.find(c=>sent.includes(c));
+  if(!mainTerm)return null;
+  const dists=getDistractors(sent,all,3);
+  if(dists.length<3)return null;
+  const stem=sent.slice(0,90).replace(/[.;]$/,'');
+  const opts=shuffle([stem,...dists.slice(0,3)]);
+  return{type:'mc',question:`Which statement about "${mainTerm}" is from your notes?`,options:opts,correct:opts.indexOf(stem),explain:`From your notes: "${sent.slice(0,160)}"`};
+}
+
+function makeTF(sent,all,diff){
+  if(sent.length<50)return null;
+  const isTrue=Math.random()>0.42;
+  let statement=sent.slice(0,160).replace(/[.;]$/,'');
+  if(!isTrue){
+    const distorted=distort(statement,all,concepts_cache);
+    if(!distorted)return null;
+    statement=distorted;
+  }
+  return{type:'tf',question:`True or False: "${capFirst(statement)}"`,options:['✅ True','❌ False'],correct:isTrue?0:1,explain:isTrue?'Correct! This is directly from your notes.':'This statement has been altered — your notes say something different.'};
+}
+
+function makeFB(sent,all,concepts,diff){
+  const term=concepts.find(c=>sent.includes(c)&&c.length>4&&sent.indexOf(c)>15);
+  if(!term)return null;
+  const blanked=sent.replace(term,'___________');
+  if(!blanked.includes('___________'))return null;
+  const dists=concepts.filter(c=>c!==term&&c.length>3).slice(0,8);
+  if(dists.length<3)return null;
+  const opts=shuffle([term,...shuffle(dists).slice(0,3)]);
+  return{type:'fb',question:`Fill in the blank:\n"${blanked.slice(0,200)}"`,options:opts,correct:opts.indexOf(term),explain:`The answer is "${term}". From your notes: "${sent.slice(0,140)}"`};
+}
+
+// cache for TF distortions
+let concepts_cache=[];
+
+function distort(s,all,concepts){
+  const ws=s.split(/\s+/);
+  if(ws.length<6)return null;
+  const idx=Math.floor(3+Math.random()*(ws.length-5));
+  const pool=all.flatMap(a=>a.split(/\s+/).filter(w=>w.length>4&&!/^\d/.test(w)));
+  if(!pool.length)return null;
+  const rep=pool[Math.floor(Math.random()*pool.length)].replace(/[,.:;]$/,'');
+  ws[idx]=rep;
+  return ws.join(' ');
+}
+
+function getDistractors(target,all,n){
+  return shuffle(all.filter(s=>s!==target).map(s=>s.slice(0,90).replace(/[.;]$/,''))).slice(0,n);
+}
+
+// ── RENDER QUIZ ──
+function renderQuiz(){
+  const area=document.getElementById('quizArea');
+  area.innerHTML='';
+  area.className='quiz-area on';
+  area.innerHTML=`<div class="quiz-bar"><span class="q-counter" id="qCounter">0 of ${activeQuiz.length} answered</span><span class="q-score-badge" id="qScore">⭐ 0 / ${activeQuiz.length}</span></div>`;
+
+  activeQuiz.forEach((q,qi)=>{
+    const tl={mc:'Multiple Choice',tf:'True / False',fb:'Fill in the Blank'}[q.type];
+    const tc={mc:'type-mc',tf:'type-tf',fb:'type-fb'}[q.type];
+    const card=document.createElement('div');
+    card.className='q-card';card.id='qc-'+qi;
+    card.innerHTML=`
+      <div class="q-num-label"><span>Q${qi+1}</span><span class="q-type-badge ${tc}">${tl}</span></div>
+      <div class="q-text">${esc(q.question)}</div>
+      <div class="q-opts" id="qo-${qi}">${q.options.map((o,oi)=>`
+        <button class="q-opt" onclick="answerQ(${qi},${oi})">
+          <span class="opt-lbl">${['A','B','C','D'][oi]||'?'}</span>${esc(o)}
+        </button>`).join('')}
+      </div>
+      <div class="q-explain" id="qe-${qi}">${esc(q.explain||'')}</div>
+    `;
+    area.appendChild(card);
+  });
+
+  const rph=document.createElement('div');
+  rph.id='qResults';rph.style.display='none';
+  area.appendChild(rph);
+}
+
+function answerQ(qi,oi){
+  if(quizAnswered[qi])return;
+  quizAnswered[qi]=true;
+  const q=activeQuiz[qi];
+  document.querySelectorAll('#qo-'+qi+' .q-opt').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.correct)b.classList.add('correct');
+    else if(i===oi&&oi!==q.correct)b.classList.add('wrong');
+  });
+  if(oi===q.correct)quizScore++;
+  document.getElementById('qe-'+qi).className='q-explain on';
+  const ans=quizAnswered.filter(Boolean).length;
+  document.getElementById('qCounter').textContent=`${ans} of ${activeQuiz.length} answered`;
+  document.getElementById('qScore').textContent=`⭐ ${quizScore} / ${activeQuiz.length}`;
+  if(ans===activeQuiz.length)showResults();
+}
+
+function showResults(){
+  const pct=Math.round(quizScore/activeQuiz.length*100);
+  let emoji='😅',msg='Keep going — every quiz makes you sharper!';
+  if(pct>=90){emoji='🌟';msg='Absolutely brilliant, Steph! Phil is SO proud of you 💛';}
+  else if(pct>=75){emoji='🎉';msg='Great work, future OD! You\'ve got this!';}
+  else if(pct>=60){emoji='👍';msg='Solid! Review the missed ones and try again.';}
+  else if(pct>=40){emoji='📖';msg='Keep studying — every session builds those neural pathways!';}
+  const res=document.getElementById('qResults');
+  res.style.display='';
+  res.innerHTML=`<div class="results-wrap"><div class="res-emoji">${emoji}</div><div class="res-score">${quizScore} / ${activeQuiz.length}</div><div class="res-pct">${pct}% correct</div><div class="res-msg">${msg}</div><button class="btn-p" onclick="buildQuiz()">🔄 New Quiz — Same Notes</button> <button class="btn-s" style="margin-top:10px" onclick="clearFile()">📁 Upload Different Notes</button></div>`;
+  res.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ─────────────────────────────────────────────
+//  SNELLEN SPRINT
+// ─────────────────────────────────────────────
+const SN='EOFLPZTDBCNHSV';
+let snActive=false,snPts=0,snTotal=0,snCorrect=0,snTime=60,snCurrent='',snLetterT=0;
+let snGameTimer=null,snLetTimer=null;
+
+function snellenStart(){
+  snActive=true;snPts=0;snTotal=0;snCorrect=0;snTime=60;
+  document.getElementById('sn-start').style.display='none';
+  document.getElementById('sn-result').style.display='none';
+  document.getElementById('sn-play').style.display='block';
+  ['snTime','snPts'].forEach(id=>document.getElementById(id).textContent=id==='snTime'?'60':'0');
+  document.getElementById('snAcc').textContent='100';
+  document.getElementById('snInp').value='';
+  document.getElementById('snInp').focus();
+  clearInterval(snGameTimer);
+  snGameTimer=setInterval(()=>{snTime--;document.getElementById('snTime').textContent=snTime;if(snTime<=0)snEnd();},1000);
+  snNext();
+}
+function snNext(){
+  if(!snActive)return;
+  clearInterval(snLetTimer);
+  snCurrent=SN[Math.floor(Math.random()*SN.length)];
+  const base=Math.max(18,72-Math.floor(snPts/8)*2);
+  const el=document.getElementById('snLtr');
+  el.textContent=snCurrent;el.style.fontSize=base+'px';el.style.color='#111';
+  snLetterT=3.0;snBar(1);
+  snLetTimer=setInterval(()=>{
+    snLetterT-=0.05;const r=Math.max(0,snLetterT/3);snBar(r);
+    el.style.fontSize=Math.max(11,base*(0.3+r*0.7))+'px';
+    if(snLetterT<=0){clearInterval(snLetTimer);snTotal++;el.style.color='#ff4d6d';document.getElementById('snInp').value='';snStats();setTimeout(()=>{if(snActive)snNext();},450);}
+  },50);
+}
+function snInput(e){
+  if(!snActive)return;
+  const v=e.target.value.toUpperCase();if(!v)return;
+  const typed=v[v.length-1];
+  clearInterval(snLetTimer);snTotal++;
+  const el=document.getElementById('snLtr');
+  if(typed===snCurrent){snCorrect++;snPts+=10;el.style.color='#00d4be';el.textContent='✓';}
+  else{el.style.color='#ff4d6d';el.textContent='✗';}
+  e.target.value='';snStats();
+  setTimeout(()=>{if(snActive)snNext();},280);
+}
+function snBar(r){const f=document.getElementById('snLBar');f.style.width=(r*100)+'%';f.style.background=r>0.5?'var(--teal)':r>0.25?'var(--yellow)':'var(--accent)';}
+function snStats(){document.getElementById('snPts').textContent=snPts;document.getElementById('snAcc').textContent=snTotal>0?Math.round(snCorrect/snTotal*100):100;}
+function snEnd(){
+  snActive=false;clearInterval(snGameTimer);clearInterval(snLetTimer);
+  document.getElementById('sn-play').style.display='none';document.getElementById('sn-result').style.display='block';
+  const acc=snTotal>0?Math.round(snCorrect/snTotal*100):0;
+  let rating='😢 Practice makes perfect!';
+  if(acc>=90)rating='🌟 Incredible! Phil says you have perfect eyes! 👁️';
+  else if(acc>=75)rating='🎉 Great job, future optometrist!';
+  else if(acc>=55)rating='👍 Solid! Keep those eyes sharp.';
+  document.getElementById('snFPts').textContent=snPts;
+  document.getElementById('snFAcc').textContent=acc;
+  document.getElementById('snRating').textContent=rating;
+}
+
+// ─────────────────────────────────────────────
+//  OD TRIVIA
+// ─────────────────────────────────────────────
+const TRIVIA=[
+  {q:"Most common refractive error worldwide?",opts:["Hyperopia","Myopia","Astigmatism","Presbyopia"],c:1,fact:"Myopia affects over 2.6 billion people globally and is the world's most prevalent refractive error."},
+  {q:"Which retinal zone has the highest cone density and sharpest acuity?",opts:["Optic disc","Peripheral retina","Fovea centralis","Ora serrata"],c:2,fact:"The fovea centralis has the densest cone packing, enabling detailed central vision."},
+  {q:"IOP stands for:",opts:["Internal Ocular Pressure","Intraocular Pressure","Intrinsic Optic Power","Infraorbital Pressure"],c:1,fact:"Intraocular Pressure — elevated IOP is a major risk factor for glaucoma."},
+  {q:"A -3.00 D lens corrects:",opts:["Hyperopia","Presbyopia","Myopia","Emmetropia"],c:2,fact:"Minus (diverging) lenses correct myopia by moving the focal point back onto the retina."},
+  {q:"Which vitamin deficiency causes night blindness?",opts:["Vitamin C","Vitamin D","Vitamin B12","Vitamin A"],c:3,fact:"Vitamin A is essential for rhodopsin synthesis in rods — the photoreceptors for low-light vision."},
+  {q:"Gold standard for measuring IOP?",opts:["Ophthalmoscope","Slit lamp","Goldmann Applanation Tonometer","Retinoscope"],c:2,fact:"The Goldmann applanation tonometer measures the force to flatten a fixed area of cornea — clinical gold standard."},
+  {q:"Approximate axial length of an emmetropic adult eye?",opts:["16 mm","20 mm","24 mm","28 mm"],c:2,fact:"~24 mm is the average. Myopic eyes tend to have longer axial lengths."},
+  {q:"Which photoreceptors mediate colour vision?",opts:["Rods","Cones","Ganglion cells","Bipolar cells"],c:1,fact:"Three cone types (S, M, L) sensitive to different wavelengths form the basis of trichromatic colour vision."},
+  {q:"The physiological blind spot is the:",opts:["Fovea centralis","Macula lutea","Ora serrata","Optic disc"],c:3,fact:"The optic disc has no photoreceptors — it's where the optic nerve exits, creating the natural blind spot."},
+  {q:"Presbyopia is primarily caused by:",opts:["Eyeball elongation","Corneal irregularity","Loss of lens elasticity","Increased IOP"],c:2,fact:"From ~age 40, the crystalline lens loses elasticity, reducing accommodation and near-vision clarity."},
+  {q:"Which corneal layer regenerates fastest?",opts:["Epithelium","Bowman's layer","Stroma","Endothelium"],c:0,fact:"The corneal epithelium can fully replace itself in ~7 days — remarkable regenerative capacity."},
+  {q:"In prescription notation, 'OS' means:",opts:["Right eye","Left eye","Both eyes","Outer surface"],c:1,fact:"OS = Oculus Sinister (left), OD = Oculus Dexter (right), OU = Oculus Uterque (both)."},
+  {q:"Aqueous humour is produced by the:",opts:["Iris","Ciliary body","Choroid","Cornea"],c:1,fact:"The ciliary body secretes aqueous humour; impaired drainage raises IOP, risking glaucoma."},
+  {q:"Cataracts involve clouding of the:",opts:["Cornea","Vitreous humour","Crystalline lens","Conjunctiva"],c:2,fact:"Cataracts are the leading cause of reversible blindness worldwide, treated surgically."},
+  {q:"Retinal signals are first relayed to the:",opts:["Frontal lobe","Cerebellum","Lateral geniculate nucleus","Hippocampus"],c:2,fact:"The optic nerve projects to the LGN of the thalamus, then on to primary visual cortex V1."},
+  {q:"Astigmatism most commonly results from:",opts:["Unequal corneal curvature","A flat lens","Excess aqueous humour","Short axial length"],c:0,fact:"An irregular corneal (or lens) curvature causes light to focus at multiple points, producing astigmatism."},
+  {q:"Rods are primarily responsible for:",opts:["Colour discrimination","High-acuity central vision","Scotopic (low-light) vision","Refraction"],c:2,fact:"Rods are highly light-sensitive and crucial for night and peripheral vision — they don't detect colour."},
+  {q:"20/40 vision means:",opts:["Half as sharp as normal","You see at 20 ft what normal sees at 40 ft","You see at 40 ft what normal sees at 20 ft","You can read 40 lines"],c:1,fact:"20/40 means you need to be 20 ft away to see what a normally-sighted person can see clearly at 40 ft."},
+  {q:"First-line IOP-lowering class for glaucoma:",opts:["Antihistamines","Prostaglandin analogues","ACE inhibitors","Corticosteroids"],c:1,fact:"Topical prostaglandin analogues (e.g., latanoprost) increase aqueous outflow and are now standard first-line therapy."},
+  {q:"The tough white outer coat of the eye is the:",opts:["Cornea","Sclera","Conjunctiva","Choroid"],c:1,fact:"The sclera forms the protective fibrous shell. The transparent anterior portion is the specialised cornea."},
+  {q:"Which layer of the retina directly converts light to signals?",opts:["Ganglion cell layer","Photoreceptor layer","Nerve fibre layer","Inner nuclear layer"],c:1,fact:"Photoreceptors (rods and cones) in the outer retina absorb photons and convert them to electrical signals."},
+  {q:"The condition where the optic nerve is damaged by elevated IOP is:",opts:["Macular degeneration","Diabetic retinopathy","Glaucoma","Uveitis"],c:2,fact:"Glaucoma involves progressive optic nerve damage, often associated with elevated IOP, leading to visual field loss."},
+  {q:"Which eye muscle is responsible for intorsion?",opts:["Superior rectus","Inferior oblique","Superior oblique","Medial rectus"],c:2,fact:"The superior oblique muscle primarily causes intorsion (inward rotation), depression, and abduction."},
+  {q:"The corneal endothelium maintains corneal clarity primarily by:",opts:["Producing tears","Pumping fluid out of the stroma","Providing nutrients to epithelium","Refracting light"],c:1,fact:"The endothelium's ion pumps actively remove fluid from the stroma — if it fails, the cornea swells and becomes cloudy."},
+  {q:"Convergence insufficiency primarily affects:",opts:["Distance vision","Near binocular vision","Colour perception","Night vision"],c:1,fact:"Convergence insufficiency impairs the eyes' ability to work together at near distances, causing eyestrain and diplopia."},
+  {q:"What is the approximate refractive power of the cornea?",opts:["10 D","25 D","43 D","65 D"],c:2,fact:"The cornea contributes roughly 43 dioptres — about two-thirds of the eye's total refractive power (~60 D total)."},
+  {q:"Diabetic retinopathy in its early stage is called:",opts:["Proliferative DR","Non-proliferative DR","Exudative DR","Central DR"],c:1,fact:"Non-proliferative (background) diabetic retinopathy is the early stage, featuring microaneurysms and haemorrhages."},
+  {q:"Which cranial nerve controls the lateral rectus muscle?",opts:["CN III","CN IV","CN V","CN VI"],c:3,fact:"CN VI (abducens) innervates the lateral rectus, responsible for abduction (outward movement) of the eye."},
+  {q:"The main cause of irreversible blindness in developed countries?",opts:["Cataracts","Age-related macular degeneration","Glaucoma","Diabetic retinopathy"],c:1,fact:"AMD destroys central vision by damaging the macula — it is the leading cause of irreversible blindness in older adults in developed countries."},
+  {q:"Fluorescein angiography is used primarily to evaluate:",opts:["IOP","Retinal and choroidal vasculature","Corneal thickness","Lens opacity"],c:1,fact:"Fluorescein dye highlights blood flow in the retinal and choroidal vessels, useful for diagnosing AMD, DR, and vascular occlusions."},
+  {q:"Which structure controls the pupil's size?",opts:["Ciliary body","Iris","Choroid","Sclera"],c:1,fact:"The iris contains two muscles — the sphincter pupillae (constricts) and dilator pupillae (dilates) — controlling pupil size."},
+  {q:"Accommodation refers to the eye's ability to:",opts:["Adapt to darkness","Adjust focus for different distances","Rotate in the orbit","Resist infection"],c:1,fact:"Accommodation is the process by which the ciliary muscle contracts to change lens shape, allowing focus at different distances."},
+  {q:"Central scotoma is most associated with:",opts:["Glaucoma","Retinitis pigmentosa","Macular degeneration","Optic neuritis"],c:2,fact:"Macular degeneration damages the central retina, creating a central scotoma (blind spot in central vision)."},
+  {q:"The vitreous humour is composed mainly of:",opts:["Aqueous fluid","Collagen fibres and hyaluronic acid","Lipids","Mucin"],c:1,fact:"The vitreous is a gel composed mostly of water, collagen fibrils, and hyaluronic acid, filling the posterior segment."},
+  {q:"Which test measures visual field?",opts:["Humphrey Field Analyzer","Pachymeter","Keratometer","A-scan biometry"],c:0,fact:"The Humphrey Field Analyzer is the standard automated perimeter used to detect and monitor visual field defects."},
+  {q:"Keratoconus is characterised by:",opts:["Flat cornea","Cloudy lens","Progressive corneal thinning and bulging","Retinal detachment"],c:2,fact:"Keratoconus involves progressive thinning and forward cone-shaped bulging of the cornea, causing irregular astigmatism."},
+  {q:"OCT stands for:",opts:["Optical Coherence Tomography","Ocular Cell Test","Optic Corneal Topography","Oblique Convergence Technique"],c:0,fact:"OCT uses light interference to produce high-resolution cross-sectional images of retinal layers and the optic nerve head."},
+  {q:"Colour blindness most commonly affects which colours?",opts:["Blue-yellow","Red-green","Black-white","Orange-purple"],c:1,fact:"Red-green colour deficiency is by far the most common type, caused by defects in L or M cone pigments."},
+  {q:"The tear film consists of how many main layers?",opts:["1","2","3","4"],c:2,fact:"The tear film has three layers: a lipid (outer) layer from the meibomian glands, aqueous (middle), and mucin (inner) layer."},
+  {q:"Esotropia is:",opts:["Outward eye deviation","Inward eye deviation","Vertical eye deviation","Normal ocular alignment"],c:1,fact:"Esotropia ('crossed eyes') is a convergent strabismus where one or both eyes turn inward."},
+  {q:"Which instrument maps corneal curvature?",opts:["Tonometer","Keratometer / Topographer","Retinoscope","Pachymeter"],c:1,fact:"A keratometer (or corneal topographer) measures corneal curvature, essential for contact lens fitting and LASIK planning."},
+  {q:"Horner's syndrome involves:",opts:["Dilated pupil, ptosis, anhidrosis","Miosis, ptosis, anhidrosis","Mydriasis, lagophthalmos, proptosis","Miosis, lid retraction, hyperhidrosis"],c:1,fact:"Horner's syndrome triad: miosis (small pupil), ptosis (drooping lid), and anhidrosis (decreased sweating on the affected side)."},
+  {q:"The macula is defined as the area of retina with more than how many layers of ganglion cells?",opts:["1","2","4","6"],c:1,fact:"The macula is defined anatomically as the region where the ganglion cell layer is more than one cell thick (≥2 layers)."},
+  {q:"Retinitis pigmentosa primarily affects:",opts:["Cones first","Rods first","Ganglion cells first","Bipolar cells first"],c:1,fact:"RP classically begins with rod photoreceptor degeneration, causing night blindness and peripheral field loss before central vision is affected."},
+  {q:"The normal cup-to-disc ratio is approximately:",opts:["0.1","0.3","0.7","0.9"],c:1,fact:"A C:D ratio of ~0.3 is considered normal; ratios above 0.5–0.6, especially if asymmetric, raise suspicion for glaucoma."},
+  {q:"Amblyopia is best defined as:",opts:["Double vision","Reduced vision not correctable by lenses alone","Inflammation of the optic nerve","Loss of peripheral vision"],c:1,fact:"Amblyopia ('lazy eye') is reduced visual acuity in an eye that has not developed normal vision, usually due to strabismus or anisometropia during childhood."},
+  {q:"Which layer of the cornea has NO regenerative ability?",opts:["Epithelium","Bowman's layer","Stroma","Endothelium"],c:3,fact:"The corneal endothelium cannot regenerate — lost cells cause neighbouring cells to enlarge and spread to compensate, reducing density over time."},
+  {q:"Scleritis is differentiated from episcleritis by:",opts:["Red eye appearance","Severity of pain and deeper vessel involvement","Presence of discharge","Pupil size"],c:1,fact:"Scleritis is much more painful and involves deeper scleral vessels; it can be associated with serious systemic disease. Episcleritis is milder and more superficial."},
+  {q:"The primary action of the inferior oblique muscle is:",opts:["Depression and intorsion","Elevation and extorsion","Adduction","Abduction"],c:1,fact:"The inferior oblique primarily elevates and extorts (outward rotates) the eye, especially in adduction."},
+  {q:"Pachymetry measures:",opts:["Axial length","Corneal thickness","Retinal thickness","IOP"],c:1,fact:"Pachymetry measures corneal thickness — important for glaucoma management and LASIK candidacy assessment."},
+  {q:"Which condition causes 'cotton wool spots' on fundoscopy?",opts:["Myopia","Cataract","Hypertensive or diabetic retinopathy","Keratoconus"],c:2,fact:"Cotton wool spots are nerve fibre layer infarcts seen in hypertensive retinopathy, diabetic retinopathy, and other ischaemic conditions."},
+  {q:"The anterior chamber angle is examined using:",opts:["Ophthalmoscopy","Gonioscopy","Tonometry","Fluorescein angiography"],c:1,fact:"Gonioscopy uses a mirrored contact lens to visualise the iridocorneal angle, critical for classifying open vs. closed-angle glaucoma."},
+  {q:"Which drug dilates the pupil by blocking muscarinic receptors?",opts:["Pilocarpine","Atropine","Timolol","Latanoprost"],c:1,fact:"Atropine (and tropicamide) are anticholinergic agents that block the iris sphincter muscle, causing mydriasis and cycloplegia."},
+  {q:"Pilocarpine is used in glaucoma to:",opts:["Dilate the pupil","Increase aqueous production","Constrict the pupil and open the trabecular meshwork","Block beta receptors"],c:2,fact:"Pilocarpine, a cholinergic agonist, constricts the pupil and contracts the ciliary muscle, opening the trabecular meshwork and lowering IOP."},
+  {q:"The fovea is approximately how many degrees from the optic disc?",opts:["5°","10°","15°","25°"],c:2,fact:"The fovea is located approximately 15-17° temporal to the optic disc, corresponding to about 4-5 mm in the adult eye."},
+  {q:"Convergence of the eyes is controlled primarily by:",opts:["CN VI alone","Medial recti muscles","Lateral recti muscles","Superior oblique muscles"],c:1,fact:"Convergence involves simultaneous contraction of both medial recti (CN III), turning the eyes inward to fixate a near target."},
+  {q:"Which test is used to detect a relative afferent pupillary defect (RAPD)?",opts:["Cover test","Swinging flashlight test","Schirmer's test","Amsler grid"],c:1,fact:"The swinging flashlight test alternates light between eyes — in RAPD the affected eye's pupil dilates rather than constricts when illuminated."},
+  {q:"The Amsler grid is used primarily to monitor:",opts:["IOP changes","Visual field in glaucoma","Central vision distortion in macular disease","Colour vision"],c:2,fact:"The Amsler grid detects metamorphopsia (wavy or distorted lines) and scotomas associated with macular diseases like AMD."},
+  {q:"What is the normal central corneal thickness?",opts:["350–400 µm","450–480 µm","520–560 µm","600–650 µm"],c:2,fact:"Normal central corneal thickness (CCT) is approximately 520–560 µm. Thin corneas underestimate IOP; thick corneas overestimate it."},
+  {q:"Laser photocoagulation in diabetic retinopathy targets:",opts:["The optic nerve","Ischaemic retinal areas to reduce VEGF production","The macula exclusively","The vitreous"],c:1,fact:"Pan-retinal photocoagulation destroys ischaemic peripheral retina, reducing VEGF production and preventing neovascularisation."},
+  {q:"Which layer of the retina is affected first in glaucoma?",opts:["Photoreceptor layer","Retinal nerve fibre layer","Choroid","Outer nuclear layer"],c:1,fact:"Glaucoma preferentially damages the retinal nerve fibre layer (RNFL) — thinning of the RNFL is an early detectable sign of glaucomatous damage."},
+  {q:"The pupillary light reflex pathway involves which cranial nerves?",opts:["CN II and III","CN III and IV","CN II and VI","CN IV and VI"],c:0,fact:"The afferent limb is CN II (optic nerve) and the efferent limb is CN III (oculomotor, via the Edinger-Westphal nucleus), controlling pupil constriction."},
+  {q:"Strabismus is best defined as:",opts:["Blurred vision at near","Misalignment of the visual axes","Inflammation of the cornea","Increased IOP"],c:1,fact:"Strabismus is a condition where the two eyes do not point in the same direction simultaneously, affecting binocular vision."},
+  {q:"Corneal topography is most useful for diagnosing:",opts:["Glaucoma","Macular degeneration","Keratoconus and irregular astigmatism","Cataracts"],c:2,fact:"Corneal topography maps surface curvature and is essential for detecting keratoconus, planning refractive surgery, and fitting contact lenses."},
+  {q:"The Hardy-Rand-Rittler (HRR) test assesses:",opts:["Visual acuity","IOP","Colour vision, including blue-yellow defects","Stereopsis"],c:2,fact:"HRR is a pseudoisochromatic plate test that detects both red-green and blue-yellow colour vision deficiencies."},
+  {q:"What does VEGF stand for in the context of eye disease?",opts:["Visual Enhancement Growth Factor","Vascular Endothelial Growth Factor","Vitreous Epithelial Generating Factor","Vertical Eye Growth Factor"],c:1,fact:"VEGF (Vascular Endothelial Growth Factor) drives abnormal blood vessel growth in proliferative DR and wet AMD — anti-VEGF injections are a key treatment."},
+  {q:"The stereoacuity test measures:",opts:["Contrast sensitivity","Depth perception from binocular disparity","Peripheral visual field","Colour discrimination"],c:1,fact:"Stereoacuity tests (e.g., Randot, TNO) measure fine depth perception based on horizontal retinal image disparity between the two eyes."},
+  {q:"Which cranial nerve is responsible for the corneal reflex (blink)?",opts:["Afferent: CN V; Efferent: CN VII","Afferent: CN III; Efferent: CN VII","Afferent: CN II; Efferent: CN V","Afferent: CN VII; Efferent: CN III"],c:0,fact:"CN V1 (ophthalmic branch of trigeminal) is the sensory afferent; CN VII (facial) drives the orbicularis to blink."},
+  {q:"Central retinal artery occlusion classically presents with:",opts:["Gradual blurring over weeks","Sudden painless loss of vision in one eye","Painful red eye with halos","Double vision"],c:1,fact:"CRAO causes sudden, profound, painless monocular vision loss. Fundoscopy shows a pale retina with a 'cherry red spot' at the fovea."},
+  {q:"The normal IOP range is approximately:",opts:["5–10 mmHg","10–21 mmHg","22–30 mmHg","30–40 mmHg"],c:1,fact:"Normal IOP is typically 10–21 mmHg. Values above 21 mmHg are termed ocular hypertension, though glaucoma can occur at any IOP."},
+  {q:"Which refractive surgery procedure removes corneal tissue using a laser?",opts:["LASIK / PRK","Phacoemulsification","Trabeculectomy","Vitrectomy"],c:0,fact:"LASIK and PRK use an excimer laser to ablate corneal stroma, permanently reshaping the cornea to correct refractive errors."},
+  {q:"Epiphora is the medical term for:",opts:["Dry eye syndrome","Overflow of tears down the cheek","Inflammation of the eyelid","Swelling of the optic disc"],c:1,fact:"Epiphora is excessive tearing or overflow of tears — caused by overproduction (reflex tearing) or impaired drainage via the nasolacrimal duct."},
+  {q:"The Ishihara test is used to screen for:",opts:["Glaucoma","Visual field defects","Red-green colour deficiency","Macular degeneration"],c:2,fact:"Ishihara pseudoisochromatic plates are the standard screening tool for red-green colour vision deficiency."},
+  {q:"Pelli-Robson chart tests:",opts:["Visual acuity","Contrast sensitivity","Stereoacuity","Colour vision"],c:1,fact:"The Pelli-Robson chart measures contrast sensitivity using letters of the same size but decreasing contrast — important for assessing functional vision."},
+  {q:"Which structure separates the anterior from the posterior chamber?",opts:["Cornea","Lens and iris","Vitreous face","Ciliary body"],c:1,fact:"The iris and lens divide the interior of the eye into the anterior chamber (front of iris) and posterior chamber (behind iris, in front of vitreous)."},
+  {q:"Blepharitis is inflammation of the:",opts:["Retina","Eyelid margins","Optic nerve","Cornea"],c:1,fact:"Blepharitis is chronic inflammation of the eyelid margins, often involving the meibomian glands or lash follicles — a common cause of dry eye symptoms."},
+  {q:"In the visual pathway, fibres from the nasal retina:",opts:["Stay ipsilateral at the chiasm","Cross at the optic chiasm","Travel directly to the cortex","Are lost before the chiasm"],c:1,fact:"Nasal retinal fibres (representing temporal visual field) decussate at the optic chiasm to the contralateral optic tract."},
+  {q:"A bitemporal hemianopia (loss of both temporal visual fields) suggests a lesion at the:",opts:["Optic nerve","Optic chiasm","Optic tract","Visual cortex"],c:1,fact:"The optic chiasm is where nasal fibres from both eyes cross — a lesion here (e.g., pituitary adenoma) causes bitemporal hemianopia."},
+  {q:"Which of the following is NOT part of the uveal tract?",opts:["Iris","Ciliary body","Choroid","Sclera"],c:3,fact:"The uveal tract = iris + ciliary body + choroid. The sclera is the fibrous outer coat, not part of the uvea."},
+  {q:"Photopsia (seeing flashes of light) is most associated with:",opts:["Corneal abrasion","Posterior vitreous detachment or retinal tear","Glaucoma","Dry eye"],c:1,fact:"Photopsia occurs when the vitreous tugs on or tears the retina, stimulating photoreceptors mechanically — a warning sign of retinal detachment."}
+];
+let trIdx=0,trScore=0,trOrder=[];
+function triviaStart(){
+  trIdx=0;trScore=0;trOrder=shuffle([...Array(TRIVIA.length).keys()]);
+  document.getElementById('tr-start').style.display='none';
+  document.getElementById('tr-result').style.display='none';
+  document.getElementById('tr-play').style.display='block';
+  trRender();
+}
+function trRender(){
+  const q=TRIVIA[trOrder[trIdx]];
+  document.getElementById('trProg').textContent=`${trIdx+1} / ${TRIVIA.length}`;
+  document.getElementById('trPts').textContent=trScore;
+  document.getElementById('trQ').textContent=q.q;
+  document.getElementById('trFact').className='tr-fact';
+  document.getElementById('trNext').style.display='none';
+  const opts=document.getElementById('trOpts');
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='tr-opt';b.textContent=o;b.onclick=()=>trAnswer(i);opts.appendChild(b);});
+}
+function trAnswer(chosen){
+  const q=TRIVIA[trOrder[trIdx]];
+  document.querySelectorAll('.tr-opt').forEach((b,i)=>{b.disabled=true;if(i===q.c)b.classList.add('correct');else if(i===chosen&&chosen!==q.c)b.classList.add('wrong');});
+  if(chosen===q.c)trScore++;
+  document.getElementById('trPts').textContent=trScore;
+  const f=document.getElementById('trFact');f.textContent='💡 '+q.fact;f.className='tr-fact on';
+  document.getElementById('trNext').style.display='block';
+}
+function triviaNext(){trIdx++;if(trIdx>=TRIVIA.length)trEnd();else trRender();}
+function trEnd(){
+  document.getElementById('tr-play').style.display='none';
+  document.getElementById('tr-result').style.display='block';
+  document.getElementById('trFPts').textContent=trScore;
+  const pct=Math.round(trScore/TRIVIA.length*100);
+  let msg='Keep studying — you\'re getting there! 📚';
+  if(pct>=90)msg='🌟 Outstanding! Phil is bragging about you to everyone!';
+  else if(pct>=75)msg='🎉 Brilliant, Steph! Future OD confirmed.';
+  else if(pct>=55)msg='👍 Good effort! A bit more revision and you\'ll ace it.';
+  document.getElementById('trMsg').textContent=msg;
+  document.querySelector('#tr-result .tr-big').innerHTML=`⭐ <span id="trFPts">${trScore}</span> / ${TRIVIA.length}`;
+}
+
+// ─────────────────────────────────────────────
+//  GROQ AI MODE
+// ─────────────────────────────────────────────
+let aiModeOn = false;
+
+function getGroqKey(){return localStorage.getItem('steph_groq_key')||'';}
+function saveKey(){
+  const v=document.getElementById('keyInput').value.trim();
+  if(!v){toast('⚠️ Please paste your Groq key');return;}
+  localStorage.setItem('steph_groq_key',v);
+  updateKeyDots();
+  closeKeyModal();
+  toast('✅ Groq key saved! Toggle AI Mode on to use it.');
+}
+function openKeyModal(){
+  document.getElementById('keyInput').value=getGroqKey();
+  document.getElementById('keyModal').classList.add('open');
+}
+function closeKeyModal(){document.getElementById('keyModal').classList.remove('open');}
+document.getElementById('keyModal').addEventListener('click',function(e){if(e.target===this)closeKeyModal();});
+
+function updateKeyDots(){
+  const has=!!getGroqKey();
+  document.getElementById('keyDot').className='key-dot'+(has?' set':'');
+  document.getElementById('navKeyDot').className='key-dot'+(has?' set':'');
+  const kb=document.getElementById('keyInput');
+  if(kb)kb.value=getGroqKey();
+}
+updateKeyDots();
+
+function toggleAI(){
+  const tog=document.getElementById('aiToggle');
+  if(tog.checked&&!getGroqKey()){
+    tog.checked=false;
+    openKeyModal();
+    toast('🔑 Set your Groq key first!');
+    return;
+  }
+  aiModeOn=tog.checked;
+  const row=document.getElementById('aiToggleRow');
+  row.className='ai-toggle-row'+(aiModeOn?' active':'');
+  document.getElementById('genBtn').textContent=aiModeOn?'🤖 Generate AI Quiz':'✨ Generate My Quiz';
+  if(aiModeOn)toast('🤖 AI Mode ON — Groq will generate smarter questions!');
+  else toast('📖 Offline Mode — running locally');
+}
+
+async function buildQuizGroq(notesText, numQ, diff, mix){
+  const key=getGroqKey();
+  if(!key)throw new Error('No Groq API key set. Click "Set Key" to add your free key.');
+
+  const diffDesc={easy:'straightforward recall questions',medium:'moderate application questions',hard:'challenging analysis and clinical application questions'}[diff]||'moderate questions';
+  const typeDesc=mix==='all'?'a mix of multiple choice, true/false, and fill-in-the-blank':
+                 mix==='mc'?'multiple choice only':mix==='tf'?'true/false only':'fill-in-the-blank only';
+
+  const prompt=`You are a supportive study assistant helping Stephanie, an optometry student. Based ONLY on the provided notes, generate exactly ${numQ} quiz questions.
+
+Requirements:
+- Difficulty: ${diffDesc}
+- Types: ${typeDesc}
+- Every question must come directly from the notes
+- Return ONLY a valid JSON array — no markdown, no backticks, no explanation
+- Each object: {"type":"mc"|"tf"|"fb", "question":"...", "options":["A","B","C","D"], "correct":0, "explain":"..."}
+- For true/false: options must be exactly ["✅ True","❌ False"]
+- For fill-in-blank: blank shown as ___ in question text
+- "correct" is the 0-based index of the correct option
+- "explain" is a helpful 1-sentence hint
+
+NOTES:
+${notesText.slice(0,10000)}`;
+
+  const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body:JSON.stringify({
+      model:'llama-3.3-70b-versatile',
+      max_tokens:3000,
+      temperature:0.4,
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+
+  if(!res.ok){
+    const err=await res.json().catch(()=>({}));
+    if(res.status===401)throw new Error('Invalid Groq API key. Please check and re-enter your key.');
+    if(res.status===429)throw new Error('Groq rate limit hit. Wait a moment and try again (free tier: 30 req/min).');
+    throw new Error(err.error?.message||`Groq API error (${res.status})`);
+  }
+
+  const data=await res.json();
+  const raw=data.choices[0].message.content.trim();
+  const clean=raw.replace(/```json|```/g,'').trim();
+  // find the JSON array
+  const start=clean.indexOf('[');
+  const end=clean.lastIndexOf(']');
+  if(start===-1||end===-1)throw new Error('Groq returned an unexpected response. Try again.');
+  return JSON.parse(clean.slice(start,end+1));
+}
+
+// ─────────────────────────────────────────────
+//  RX DECODER GAME
+// ─────────────────────────────────────────────
+const RX_QS = [
+  {rx:"OD: -2.50 DS\nOS: -3.00 DS",q:"What condition does this prescription treat?",opts:["Hyperopia","Myopia","Presbyopia","Astigmatism"],c:1,fact:"Both eyes have minus sphere lenses — this corrects myopia (nearsightedness)."},
+  {rx:"OD: +1.75 DS\nOS: +2.00 DS",q:"What does '+' sphere indicate?",opts:["Myopia","Emmetropia","Hyperopia","Presbyopia"],c:2,fact:"Plus lenses converge light to correct hyperopia (farsightedness)."},
+  {rx:"OD: -1.00 -1.50 × 180\nOS: -0.75 -1.25 × 175",q:"The '-1.50 × 180' component corrects for:",opts:["Myopia","Presbyopia","Astigmatism","Glaucoma"],c:2,fact:"The cylinder (cyl) component (-1.50) and axis (×180) together correct astigmatism."},
+  {rx:"Add: +2.00 OU",q:"What does the 'Add' power indicate?",opts:["Distance correction","Night vision boost","Near addition for presbyopia","Prism correction"],c:2,fact:"The 'Add' is additional plus power for near vision, prescribed for presbyopia — typically over age 40."},
+  {rx:"OD: +4.00 DS\nOS: +0.25 DS",q:"This large difference between the two eyes is called:",opts:["Astigmatism","Anisometropia","Amblyopia","Aniridia"],c:1,fact:"Anisometropia is a significant difference in refractive error between the two eyes — here 3.75 D difference."},
+  {rx:"OD: plano\nOS: plano",q:"What does 'plano' mean in a prescription?",opts:["No refractive correction needed","Severe myopia","Bifocal required","Prism required"],c:0,fact:"Plano (0.00 D) means no spherical correction is needed — the eye is emmetropic for that component."},
+  {rx:"OD: -5.00 -0.75 × 090\nOS: -4.75 -1.00 × 085",q:"What type of refractive error is represented here?",opts:["Pure hyperopia","Pure myopia","Myopic astigmatism","Hyperopic astigmatism"],c:2,fact:"Minus sphere combined with minus cylinder = compound myopic astigmatism. Both meridians require minus correction."},
+  {rx:"Prism: 2Δ Base-In OD",q:"Prism Base-In is typically prescribed for:",opts:["Esotropia","Exotropia","Hypertropia","Myopia"],c:1,fact:"Base-In prism redirects the visual axis outward to compensate for exotropia (outward eye deviation)."},
+  {rx:"OD: +2.00 +1.00 × 090",q:"This is an example of:",opts:["Simple myopic astigmatism","Compound hyperopic astigmatism","Mixed astigmatism","Pure myopia"],c:1,fact:"Plus sphere with plus cylinder = compound hyperopic astigmatism. Both meridians need plus power."},
+  {rx:"OD: -1.00 +2.00 × 180",q:"When cyl sign is opposite to sphere, this is:",opts:["Compound myopic astigmatism","Compound hyperopic astigmatism","Mixed astigmatism","Simple hyperopia"],c:2,fact:"Opposite signs for sphere and cyl indicate mixed astigmatism — one meridian is myopic, the other hyperopic."},
+  {rx:"VA: 6/6 (20/20)",q:"What does 6/6 visual acuity mean?",opts:["Perfect colour vision","Sees at 6m what normal sees at 12m","Normal acuity — sees at 6m what normal sees at 6m","Legally blind"],c:2,fact:"6/6 (metric) = 20/20 (imperial) — the patient sees at 6 metres what a normally-sighted person sees at 6 metres."},
+  {rx:"VA: 6/60 (20/200)",q:"6/60 is significant because it is the threshold for:",opts:["Mild vision impairment","Moderate vision impairment","Legal blindness","Normal vision"],c:2,fact:"6/60 (20/200) with best correction in the better eye is the legal definition of blindness in many countries."},
+  {rx:"OD: -10.00 DS\nOS: -10.50 DS",q:"This level of myopia is classified as:",opts:["Low myopia","Moderate myopia","High myopia","Emmetropia"],c:2,fact:"High myopia is typically defined as ≥-6.00 D. High myopia carries increased risk of retinal detachment and myopic maculopathy."},
+  {rx:"OD: +0.50 DS\nOS: +0.75 DS",q:"Low plus prescriptions like these are often used for:",opts:["Night driving","High myopia management","Relieving near vision strain / early presbyopia","Treating glaucoma"],c:2,fact:"Low plus lenses reduce accommodative demand, helping patients with early presbyopia or accommodative esotropia."},
+  {rx:"BVD: 12 mm",q:"BVD (Back Vertex Distance) is important for prescriptions stronger than:",opts:["±1.00 D","±4.00 D","±0.25 D","±10.00 D"],c:1,fact:"BVD matters for powers ≥±4.00 D — the distance from the lens back surface to the cornea affects the effective power delivered to the eye."},
+];
+
+let rxIdx=0, rxScore=0, rxOrder=[];
+function rxStart(){
+  rxIdx=0;rxScore=0;rxOrder=shuffle([...Array(RX_QS.length).keys()]);
+  document.getElementById('rx-start').style.display='none';
+  document.getElementById('rx-result').style.display='none';
+  document.getElementById('rx-play').style.display='block';
+  rxRender();
+}
+function rxRender(){
+  const q=RX_QS[rxOrder[rxIdx]];
+  document.getElementById('rxIdx').textContent=rxIdx+1;
+  document.getElementById('rxScore').textContent=rxScore;
+  document.getElementById('rxDisplay').textContent=q.rx;
+  document.getElementById('rxFact').className='tr-fact';
+  document.getElementById('rxNext').style.display='none';
+  const opts=document.getElementById('rxOpts');
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='tr-opt';b.textContent=o;
+    b.onclick=()=>rxAnswer(i);
+    opts.appendChild(b);
+  });
+}
+function rxAnswer(chosen){
+  const q=RX_QS[rxOrder[rxIdx]];
+  document.querySelectorAll('#rxOpts .tr-opt').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.c)b.classList.add('correct');
+    else if(i===chosen&&chosen!==q.c)b.classList.add('wrong');
+  });
+  if(chosen===q.c)rxScore++;
+  document.getElementById('rxScore').textContent=rxScore;
+  const f=document.getElementById('rxFact');f.textContent='💡 '+q.fact;f.className='tr-fact on';
+  document.getElementById('rxNext').style.display='block';
+}
+function rxNext(){
+  rxIdx++;
+  if(rxIdx>=RX_QS.length){
+    document.getElementById('rx-play').style.display='none';
+    document.getElementById('rx-result').style.display='block';
+    document.getElementById('rxFScore').textContent=rxScore;
+    const pct=Math.round(rxScore/RX_QS.length*100);
+    let msg='Keep practising those Rx reads!';
+    if(pct>=90)msg='🌟 You can read prescriptions like a pro, Steph!';
+    else if(pct>=70)msg='🎉 Great decoding skills! Phil is impressed.';
+    else if(pct>=50)msg='👍 Getting there — review the Rx notation rules!';
+    document.getElementById('rxMsg').textContent=msg;
+  } else rxRender();
+}
+
+// ─────────────────────────────────────────────
+//  ANATOMY FLASH GAME
+// ─────────────────────────────────────────────
+const AF_DATA = [
+  {term:"Cornea",ans:"Transparent anterior window; main refracting surface (~43 D)",opts:["Transparent anterior window; main refracting surface (~43 D)","Produces aqueous humour","Converts light to electrical signals","Contains vitreous gel"]},
+  {term:"Sclera",ans:"Tough fibrous outer coat protecting the eye",opts:["Tough fibrous outer coat protecting the eye","Produces tears","Controls pupil size","Contains photoreceptors"]},
+  {term:"Iris",ans:"Coloured diaphragm controlling pupil size and light entry",opts:["Coloured diaphragm controlling pupil size and light entry","Drains aqueous humour","Refracts light at the lens","Lines the inner eyelid"]},
+  {term:"Ciliary Body",ans:"Produces aqueous humour; controls lens shape for accommodation",opts:["Produces aqueous humour; controls lens shape for accommodation","Drains the vitreous","Contains rods and cones","Forms the optic nerve"]},
+  {term:"Crystalline Lens",ans:"Biconvex structure that fine-tunes focus; changes shape for accommodation",opts:["Biconvex structure that fine-tunes focus; changes shape for accommodation","Produces tears","Main refracting surface","Drains aqueous humour"]},
+  {term:"Retina",ans:"Light-sensitive inner layer containing rods, cones and neural layers",opts:["Light-sensitive inner layer containing rods, cones and neural layers","Produces aqueous humour","Transparent outer window","Controls pupil dilation"]},
+  {term:"Fovea",ans:"Central pit in the macula with highest cone density and sharpest vision",opts:["Central pit in the macula with highest cone density and sharpest vision","Drains aqueous humour","Contains mostly rods","Part of the cornea"]},
+  {term:"Optic Disc",ans:"Exit point of optic nerve; no photoreceptors — creates the blind spot",opts:["Exit point of optic nerve; no photoreceptors — creates the blind spot","Highest acuity region","Produces vitreous","Absorbs scattered light"]},
+  {term:"Choroid",ans:"Highly vascular uveal layer supplying oxygen to the outer retina",opts:["Highly vascular uveal layer supplying oxygen to the outer retina","Controls accommodation","Refracts incoming light","Produces aqueous humour"]},
+  {term:"Trabecular Meshwork",ans:"Drainage structure at iridocorneal angle; obstruction raises IOP",opts:["Drainage structure at iridocorneal angle; obstruction raises IOP","Produces aqueous humour","Part of the cornea","Controls lens focus"]},
+  {term:"Macula",ans:"Central retinal area responsible for detailed and colour vision",opts:["Central retinal area responsible for detailed and colour vision","Exit of optic nerve","Produces vitreous humour","Controls pupil size"]},
+  {term:"Vitreous Humour",ans:"Gel filling the posterior segment; maintains eye shape",opts:["Gel filling the posterior segment; maintains eye shape","Refracts light at the front of the eye","Drains near the angle","Contains photoreceptors"]},
+  {term:"Aqueous Humour",ans:"Clear fluid filling the anterior and posterior chambers; nourishes avascular structures",opts:["Clear fluid filling the anterior and posterior chambers; nourishes avascular structures","Fills the vitreous cavity","Contains rods and cones","Part of the tear film"]},
+  {term:"Zonules",ans:"Suspensory fibres connecting ciliary body to lens; tension flattens the lens",opts:["Suspensory fibres connecting ciliary body to lens; tension flattens the lens","Drain aqueous humour","Form the corneal stroma","Produce tears"]},
+  {term:"Bowman's Layer",ans:"Acellular condensed stroma beneath corneal epithelium; does not regenerate",opts:["Acellular condensed stroma beneath corneal epithelium; does not regenerate","Regenerates every 7 days","Produces aqueous humour","Contains melanocytes"]},
+  {term:"Corneal Endothelium",ans:"Innermost corneal layer; pumps fluid out of stroma to maintain clarity",opts:["Innermost corneal layer; pumps fluid out of stroma to maintain clarity","Produces tears","Contains nerve fibres","Absorbs UV light"]},
+  {term:"Optic Nerve",ans:"Bundle of ~1.2 million ganglion cell axons transmitting visual signals to the brain",opts:["Bundle of ~1.2 million ganglion cell axons transmitting visual signals to the brain","Controls accommodation","Produces aqueous humour","Refracts light"]},
+  {term:"Meibomian Glands",ans:"Sebaceous glands in eyelid margins producing the lipid layer of the tear film",opts:["Sebaceous glands in eyelid margins producing the lipid layer of the tear film","Produce the aqueous layer of tears","Control pupil size","Are part of the retina"]},
+  {term:"Lacrimal Gland",ans:"Produces the aqueous (watery) component of tears in the superotemporal orbit",opts:["Produces the aqueous (watery) component of tears in the superotemporal orbit","Produces the lipid layer of tears","Drains aqueous humour","Controls accommodation"]},
+  {term:"Schlemm's Canal",ans:"Circular channel surrounding the cornea that collects and drains aqueous humour",opts:["Circular channel surrounding the cornea that collects and drains aqueous humour","Produces aqueous humour","Carries blood to the retina","Is part of the vitreous"]},
+];
+
+let afStreak=0, afBest=0, afUsed=new Set(), afCurrent=null;
+function afStart(){
+  afStreak=0;afUsed=new Set();afCurrent=null;
+  document.getElementById('af-start').style.display='none';
+  document.getElementById('af-result').style.display='none';
+  document.getElementById('af-play').style.display='block';
+  document.getElementById('afBest').textContent=afBest;
+  afNext();
+}
+function afNext(){
+  const available=AF_DATA.filter((_,i)=>!afUsed.has(i));
+  if(!available.length){
+    // All used — reset and keep going
+    afUsed=new Set();
+  }
+  const pool=AF_DATA.filter((_,i)=>!afUsed.has(i));
+  const item=pool[Math.floor(Math.random()*pool.length)];
+  const itemIdx=AF_DATA.indexOf(item);
+  afUsed.add(itemIdx);
+  afCurrent=item;
+  document.getElementById('afStreak').textContent=afStreak;
+  document.getElementById('afBest').textContent=afBest;
+  document.getElementById('afTerm').textContent=item.term;
+  document.getElementById('afFact').className='tr-fact';
+  document.getElementById('afNext').style.display='none';
+  const opts=document.getElementById('afOpts');
+  opts.innerHTML='';
+  // Build options: correct + 3 random from others
+  const others=AF_DATA.filter(d=>d!==item);
+  const distractors=shuffle(others).slice(0,3).map(d=>d.ans);
+  const allOpts=shuffle([item.ans,...distractors]);
+  allOpts.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='tr-opt';b.textContent=o;
+    b.onclick=()=>afAnswer(o===item.ans);
+    opts.appendChild(b);
+  });
+}
+function afAnswer(correct){
+  document.querySelectorAll('#afOpts .tr-opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===afCurrent.ans)b.classList.add('correct');
+    else if(!correct&&!b.classList.contains('correct'))b.classList.add('wrong');
+  });
+  if(correct){
+    afStreak++;
+    if(afStreak>afBest)afBest=afStreak;
+    document.getElementById('afStreak').textContent=afStreak;
+    document.getElementById('afBest').textContent=afBest;
+    document.getElementById('afFact').textContent='✅ Correct! Keep going — '+afStreak+' in a row!';
+    document.getElementById('afFact').className='tr-fact on';
+    document.getElementById('afNext').style.display='block';
+  } else {
+    document.getElementById('afFact').textContent='❌ The correct answer was: '+afCurrent.ans;
+    document.getElementById('afFact').className='tr-fact on';
+    // End game on wrong
+    setTimeout(()=>{
+      document.getElementById('af-play').style.display='none';
+      document.getElementById('af-result').style.display='block';
+      document.getElementById('afFStreak').textContent=afBest;
+      let msg='Nice try! Study those structures and beat your record!';
+      if(afBest>=15)msg='🌟 Incredible anatomy knowledge, Steph! Phil is amazed!';
+      else if(afBest>=10)msg='🎉 Great streak! You really know your eye anatomy!';
+      else if(afBest>=5)msg='👍 Solid! Keep practising to build that streak.';
+      document.getElementById('afMsg').textContent=msg;
+    },1200);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  UTILS
+// ─────────────────────────────────────────────
+function shuffle(a){return[...a].sort(()=>Math.random()-.5);}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function capFirst(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br/>');}
+function showErr(msg){const b=document.getElementById('errBox');b.textContent='⚠️ '+msg;b.className='err on';}
+function hideErr(){document.getElementById('errBox').className='err';}
+function toast(msg,dur=2800){document.querySelectorAll('.toast').forEach(t=>t.remove());const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),dur);}
+document.addEventListener('keydown',()=>{if(snActive)document.getElementById('snInp').focus();});
+</script>
+</body>
+</html>
